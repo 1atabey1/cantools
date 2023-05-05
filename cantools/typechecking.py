@@ -67,4 +67,5 @@ EncodeInputType = Union[SignalMappingType, ContainerEncodeInputType]
 
 SecOCAuthenticatorFn = Callable[["Message", bytearray, int], bytearray]
 
-PiecewiseSegment = List[Tuple[float, float]]
+# describes a closed interval [a, b]
+Interval = Tuple[float, float]

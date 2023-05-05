@@ -1,7 +1,7 @@
 import logging
 from typing import List, Optional, Tuple, Union
 
-from ..typechecking import ByteOrder, Choices, PiecewiseSegment
+from ..typechecking import ByteOrder, Choices, Interval
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ class SignalBase:
         unit: Optional[str] = None,
         choices: Optional[Choices] = None,
         is_float: bool = False,
-        segment_boundaries: Optional[PiecewiseSegment] = None,
+        segment_boundaries: Optional[List[Interval]] = None,
     ) -> None:
         # avoid using properties to improve encoding/decoding performance
 
@@ -70,11 +70,11 @@ class SignalBase:
 
         #: Stores the raw start and end points of piecewise linear segments
         #: empty for all other types
-        self.segment_boundaries_raw: PiecewiseSegment = []
+        self.segment_boundaries_raw: List[Interval] = []
 
         #: Stores the scaled start and end points of piecewise linear segments
         #: empty for all other types
-        self.segment_boundaries_scaled: PiecewiseSegment = []
+        self.segment_boundaries_scaled: List[Interval] = []
         if segment_boundaries is not None:
             if not isinstance(scale, list) or not isinstance(offset, list):
                 raise ValueError(
@@ -85,12 +85,12 @@ class SignalBase:
             self._initialize_segment_boundaries(segment_boundaries)
 
     def _initialize_segment_boundaries(
-        self, segment_boundaries: PiecewiseSegment
+        self, segment_boundaries: List[Interval]
     ) -> None:
         def convert(v, o, f):
             return v * f + o
 
-        self.segment_boundaries: PiecewiseSegment = []
+        self.segment_boundaries: List[Interval] = []
         last_phys_max = None
         for i, segment in enumerate(segment_boundaries):
             self.segment_boundaries_raw.append(segment)
@@ -125,7 +125,7 @@ class SignalBase:
         raise KeyError(f"Choice {string} not found in data element {self.name}.")
 
     def _get_offset_scaling_from_list(
-        self, val: float, segments: PiecewiseSegment
+        self, val: float, segments: List[Interval]
     ) -> Tuple[float, float]:
         assert not isinstance(self._offset, float) and not isinstance(self._scale, float)
 

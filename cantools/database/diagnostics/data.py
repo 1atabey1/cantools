@@ -2,7 +2,7 @@
 import logging
 from typing import List, Optional, Union
 
-from ...typechecking import ByteOrder, Choices, PiecewiseSegment
+from ...typechecking import ByteOrder, Choices, Interval
 from ..signalbase import SignalBase
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ class Data(SignalBase):
         offset: Union[List[float], float] = 0.0,
         minimum: Optional[float] = None,
         maximum: Optional[float] = None,
-        segment_boundaries: Optional[PiecewiseSegment] = None,
+        segment_boundaries: Optional[List[Interval]] = None,
         unit: Optional[str] = None,
         choices: Optional[Choices] = None,
     ) -> None:
