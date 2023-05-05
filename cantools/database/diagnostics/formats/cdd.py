@@ -18,13 +18,13 @@ class DataType:
         self,
         name: str,
         id_: str,
-        bit_length: int,
-        encoding: str,
-        minimum: int,
-        maximum: int,
+        bit_length: Optional[int],
+        encoding: Optional[str],
+        minimum: Optional[int],
+        maximum: Optional[int],
         choices: Optional[Choices],
         byte_order: ByteOrder,
-        unit: str,
+        unit: Optional[str],
         factor: List[float],
         offset: List[float],
         segment_intervals_raw: Optional[List[Tuple[float, float]]],
@@ -59,10 +59,10 @@ def _load_choices(data_type):
     return choices
 
 
-def _load_data_types(ecu_doc):
+def _load_data_types(ecu_doc: ElementTree.Element) -> Dict[str, DataType]:
     """Load all data types found in given ECU doc element."""
 
-    data_types = {}
+    data_types: Dict[str, DataType] = {}
 
     types = ecu_doc.findall("DATATYPES/IDENT")
     types += ecu_doc.findall("DATATYPES/LINCOMP")
@@ -81,11 +81,14 @@ def _load_data_types(ecu_doc):
         intervals = None
 
         # Name and id.
-        type_name = data_type.find("NAME/TUV[1]").text
+        type_name = data_type.findtext("NAME/TUV[1]")
+        assert type_name is not None
         type_id = data_type.attrib["id"]
+        assert type_id is not None
 
         # Load from C-type element.
         ctype = data_type.find("CVALUETYPE")
+        assert ctype is not None
 
         for key, value in ctype.attrib.items():
             if key == "bl":
