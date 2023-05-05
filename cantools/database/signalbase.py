@@ -1,11 +1,9 @@
 import contextlib
-import logging
 from typing import List, Optional, Tuple, Union
 
 from ..typechecking import ByteOrder, Choices, Interval, SignalValueType
 from .namedsignalvalue import NamedSignalValue
 
-logger = logging.getLogger(__name__)
 
 class SignalBase:
     def __init__(
@@ -15,8 +13,8 @@ class SignalBase:
         length: int,
         byte_order: ByteOrder = "little_endian",
         is_signed: bool = False,
-        scale: Union[List[float], float] = 1.0,
-        offset: Union[List[float], float] = 0.0,
+        scale: Union[List[float], int, float] = 1,
+        offset: Union[List[float], int, float] = 0,
         minimum: Optional[float] = None,
         maximum: Optional[float] = None,
         unit: Optional[str] = None,
@@ -26,30 +24,49 @@ class SignalBase:
     ) -> None:
         # avoid using properties to improve encoding/decoding performance
 
+        # ensure that either the parameters for a globally-scaled
+        # linear function are given or the ones for a piecewise linear
+        # one. TODO: using a piecewise linear function with one
+        # segment to represent globally scaled conversion functions
+        # would probably simplify stuff here
+        if isinstance(scale, list) or \
+           isinstance(offset, list) or \
+           isinstance(segment_intervals_raw, list):
+            assert isinstance(scale, list)
+            assert isinstance(offset, list)
+            if not isinstance(segment_intervals_raw, list):
+                print("foo")
+            assert isinstance(segment_intervals_raw, list)
+            assert len(segment_intervals_raw) == len(scale)
+            assert len(segment_intervals_raw) == len(offset)
+
         #: The signal name as a string.
         self.name: str = name
 
-        #: The scale factor of the data value.
-        #: For piecewise linear data each list element
-        #: represents the scale for the respective segment
+        #: The scaling factor of the data value.
+        #:
+        #: For piecewise linear data, each list element
+        #: represents the scaling factor for the respective segment
         self._scale: Union[List[float], float] = scale
 
         #: The offset of the data value.
+        #:
         #: For piecewise linear data each list element
         #: represents the offset for the respective segment
         self._offset: Union[List[float], float] = offset
 
-        #: ``True`` if the signal is a float, ``False`` otherwise.
+        #: ``True`` iff ``float`` ought to be used for the internal
+        #: representation of signal
         self.is_float: bool = is_float
 
-        #: The minimum value of the signal, or ``None`` if unavailable.
+        #: The minimum value of the signal, or ``None`` if unspecified.
         self.minimum: Optional[float] = minimum
 
-        #: The maximum value of the signal, or ``None`` if unavailable.
+        #: The maximum value of the signal, or ``None`` if unspecified.
         self.maximum: Optional[float] = maximum
 
         #: "A dictionary mapping signal values to enumerated choices, or
-        #: ``None`` if unavailable.
+        #: ``None`` if unspecified.
         self.choices: Optional[Choices] = choices
 
         #: The start bit position of the signal within its message.
@@ -69,53 +86,30 @@ class SignalBase:
         #: The unit of the signal as a string, or ``None`` if unavailable.
         self.unit: Optional[str] = unit
 
-        #: Stores the raw start and end points of piecewise linear segments
-        #: empty for all other types
-        self.segment_intervals_raw: List[Interval] = []
+        #: The raw values the of start and end points of piecewise
+        #: linear segments.  Empty if the conversion function is not
+        #: piecewise linear.
+        self.segment_intervals_raw: List[Interval] = \
+            [] if segment_intervals_raw is None else segment_intervals_raw
 
-        #: Stores the scaled start and end points of piecewise linear segments
-        #: empty for all other types
+        #: The scaled values of the start and end points of piecewise
+        #: linear segments. Empty if the conversion function is not
+        #: piecewise linear.
         self.segment_intervals_scaled: List[Interval] = []
         if segment_intervals_raw is not None:
-            if not isinstance(scale, list) or not isinstance(offset, list):
-                raise ValueError(
-                    "Params scale and offset need to be of type list "
-                    "if segment boundaries are defined."
+            assert isinstance(scale, list)
+            assert isinstance(offset, list)
+            convert = lambda value, factor, offset: value*factor + offset
+            for raw_interval, factor, delta in zip(segment_intervals_raw,
+                                                   scale,
+                                                   offset):
+                x0, x1 = raw_interval
+                self.segment_intervals_scaled.append(
+                    (convert(x0, factor, delta),
+                     convert(x1, factor, delta),)
                 )
 
-            self._initialize_segment_intervals(segment_intervals_raw)
-
-    def _initialize_segment_intervals(
-        self, segment_intervals_raw: List[Interval]
-    ) -> None:
-        def convert(v, o, f):
-            return v * f + o
-
-        self.segment_intervals: List[Interval] = []
-        last_phys_max = None
-        for i, segment in enumerate(segment_intervals_raw):
-            self.segment_intervals_raw.append(segment)
-            start, end = segment
-            scaled_segment = (
-                convert(start, self._offset[i], self._scale[i]),  # type: ignore
-                convert(end, self._offset[i], self._scale[i]),  # type: ignore
-            )
-            self.segment_intervals_scaled.append(scaled_segment)
-            if last_phys_max is None:
-                last_phys_max = scaled_segment[1]
-                continue
-
-            if last_phys_max >= scaled_segment[0]:
-                logger.warning(
-                    f"Piecewise linear type: {self.name} has overlapping segments! "
-                    f"Segment {i} starts at phys val {scaled_segment[0]} "
-                    f"but one of the prev segments ended at {last_phys_max}. "
-                    "Encoding might be ambiguous."
-                )
-
-            last_phys_max = max(scaled_segment[1], last_phys_max)
-
-    def choice_string_to_number(self, string: str) -> int:
+    def choice_string_to_number(self, string: Union[str, NamedSignalValue]) -> int:
         if self.choices is None:
             raise ValueError(f"Signal {self.name} has no choices.")
 
