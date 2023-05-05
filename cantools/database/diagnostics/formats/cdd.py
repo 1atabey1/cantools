@@ -27,7 +27,7 @@ class DataType:
         unit: str,
         factor: List[float],
         offset: List[float],
-        segment_boundaries: Optional[List[Tuple[float, float]]],
+        segment_intervals_raw: Optional[List[Tuple[float, float]]],
     ):
         self.name = name
         self.id_ = id_
@@ -40,7 +40,7 @@ class DataType:
         self.unit = unit
         self.factor = factor
         self.offset = offset
-        self.segment_boundaries = segment_boundaries
+        self.segment_intervals_raw = segment_intervals_raw
 
 
 def _load_choices(data_type):
@@ -78,7 +78,7 @@ def _load_data_types(ecu_doc):
         encoding = None
         minimum = None
         maximum = None
-        pcw_segments = None
+        intervals = None
 
         # Name and id.
         type_name = data_type.find("NAME/TUV[1]").text
@@ -119,22 +119,27 @@ def _load_data_types(ecu_doc):
         # Slope and offset.
         comps = data_type.findall("COMP")
 
-        if len(comps) > 0:
-            pcw_segments = []
+        factor: List[float]
+        offset: List[float]
+        if len(comps) == 1:
+            # Linear type
+            factor = [ float(comps[0].attrib["f"]) ]
+            offset = [ float(comps[0].attrib["o"]) ]
+        elif len(comps) > 1:
+            # Piecewise linear type
+            intervals = []
             factor = []
             offset = []
             for comp in comps:
                 factor.append(float(comp.attrib["f"]))
                 offset.append(float(comp.attrib["o"]))
-                if len(comps) > 1:
-                    # Piecewise linear type
-                    pcw_segments.append(
+                intervals.append(
                         (float(comp.attrib["s"]), float(comp.attrib["e"]))
                     )
         else:
             # non-linear data types, assume defaults
-            factor = 1
-            offset = 0
+            factor = [ 1 ]
+            offset = [ 0 ]
 
         data_types[type_id] = DataType(
             type_name,
@@ -148,7 +153,7 @@ def _load_data_types(ecu_doc):
             unit,
             factor,
             offset,
-            pcw_segments,
+            intervals,
         )
 
     return data_types
@@ -180,7 +185,7 @@ def _load_data_element(data, bit_offset, data_types):
         maximum=data_type.maximum,
         unit=data_type.unit,
         choices=data_type.choices,
-        segment_boundaries=data_type.segment_boundaries,
+        segment_intervals_raw=data_type.segment_intervals_raw,
     )
 
 

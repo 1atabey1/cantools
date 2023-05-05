@@ -1,6 +1,6 @@
 # DID data.
 import logging
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from ...typechecking import ByteOrder, Choices, Interval
 from ..signalbase import SignalBase
@@ -20,11 +20,11 @@ class Data(SignalBase):
         start: int,
         length: int,
         byte_order: ByteOrder = "little_endian",
-        scale: Union[List[float], float] = 1.0,
-        offset: Union[List[float], float] = 0.0,
+        scale: List[float] = [ 1.0 ],
+        offset: List[float] = [ 0.0 ],
         minimum: Optional[float] = None,
         maximum: Optional[float] = None,
-        segment_boundaries: Optional[List[Interval]] = None,
+        segment_intervals_raw: Optional[List[Interval]] = None,
         unit: Optional[str] = None,
         choices: Optional[Choices] = None,
     ) -> None:
@@ -34,14 +34,14 @@ class Data(SignalBase):
             length=length,
             byte_order=byte_order,
             is_signed=False,
-            scale=scale,
-            offset=offset,
+            scale=scale[0] if len(scale) == 1 else scale,
+            offset=offset[0] if len(offset) == 1 else offset,
             minimum=minimum,
             maximum=maximum,
             unit=unit,
             choices=choices,
             is_float=False,
-            segment_boundaries=segment_boundaries,
+            segment_intervals_raw=segment_intervals_raw,
         )
 
     def __repr__(self) -> str:

@@ -22,7 +22,7 @@ class SignalBase:
         unit: Optional[str] = None,
         choices: Optional[Choices] = None,
         is_float: bool = False,
-        segment_boundaries: Optional[List[Interval]] = None,
+        segment_intervals_raw: Optional[List[Interval]] = None,
     ) -> None:
         # avoid using properties to improve encoding/decoding performance
 
@@ -71,36 +71,36 @@ class SignalBase:
 
         #: Stores the raw start and end points of piecewise linear segments
         #: empty for all other types
-        self.segment_boundaries_raw: List[Interval] = []
+        self.segment_intervals_raw: List[Interval] = []
 
         #: Stores the scaled start and end points of piecewise linear segments
         #: empty for all other types
-        self.segment_boundaries_scaled: List[Interval] = []
-        if segment_boundaries is not None:
+        self.segment_intervals_scaled: List[Interval] = []
+        if segment_intervals_raw is not None:
             if not isinstance(scale, list) or not isinstance(offset, list):
                 raise ValueError(
                     "Params scale and offset need to be of type list "
                     "if segment boundaries are defined."
                 )
 
-            self._initialize_segment_boundaries(segment_boundaries)
+            self._initialize_segment_intervals(segment_intervals_raw)
 
-    def _initialize_segment_boundaries(
-        self, segment_boundaries: List[Interval]
+    def _initialize_segment_intervals(
+        self, segment_intervals_raw: List[Interval]
     ) -> None:
         def convert(v, o, f):
             return v * f + o
 
-        self.segment_boundaries: List[Interval] = []
+        self.segment_intervals: List[Interval] = []
         last_phys_max = None
-        for i, segment in enumerate(segment_boundaries):
-            self.segment_boundaries_raw.append(segment)
+        for i, segment in enumerate(segment_intervals_raw):
+            self.segment_intervals_raw.append(segment)
             start, end = segment
             scaled_segment = (
                 convert(start, self._offset[i], self._scale[i]),  # type: ignore
                 convert(end, self._offset[i], self._scale[i]),  # type: ignore
             )
-            self.segment_boundaries_scaled.append(scaled_segment)
+            self.segment_intervals_scaled.append(scaled_segment)
             if last_phys_max is None:
                 last_phys_max = scaled_segment[1]
                 continue
@@ -148,13 +148,13 @@ class SignalBase:
         If data type only defines one set of offset/scaling then
         the `raw_val` param can be omitted
         """
-        if raw_val is None or not self.segment_boundaries_raw:
+        if raw_val is None or not self.segment_intervals_raw:
             try:
                 return self._offset[0], self._scale[0]  # type: ignore
             except TypeError:
                 return self.offset, self.scale
 
-        return self._get_offset_scaling_from_list(raw_val, self.segment_boundaries_raw)
+        return self._get_offset_scaling_from_list(raw_val, self.segment_intervals_raw)
 
     def get_offset_scaling_from_scaled(
         self, scaled_val: Optional[float] = None
@@ -164,14 +164,14 @@ class SignalBase:
         If data type only defines one set of offset/scaling then
         the `scaled_val` param can be omitted
         """
-        if scaled_val is None or not self.segment_boundaries_scaled:
+        if scaled_val is None or not self.segment_intervals_scaled:
             try:
                 return self._offset[0], self._scale[0]  # type: ignore
             except TypeError:
                 return self.offset, self.scale
 
         return self._get_offset_scaling_from_list(
-            scaled_val, self.segment_boundaries_scaled
+            scaled_val, self.segment_intervals_scaled
         )
 
     @property
