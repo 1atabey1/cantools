@@ -265,7 +265,7 @@ struct abs_mm5_10_tx1_t {
     /**
      * Measured lateral acceleration.
      *
-     * Range: 0..65534.06817557760953987369082 (-4.1768..4.1765 g)
+     * Range: 0..65534 (-4.1768..4.1765 g)
      * Scale: 0.000127465
      * Offset: -4.1768
      */
@@ -290,7 +290,7 @@ struct abs_mm5_10_tx2_t {
     /**
      * Measured longitudional acceleration.
      *
-     * Range: 0..65534.06817557760953987369082 (-4.1768..4.1765 g)
+     * Range: 0..65534 (-4.1768..4.1765 g)
      * Scale: 0.000127465
      * Offset: -4.1768
      */
@@ -306,7 +306,7 @@ struct abs_mm5_10_tx3_t {
     /**
      * Measured vertical acceleration.
      *
-     * Range: 0..65534.06817557760953987369082 (-4.1768..4.1765 g)
+     * Range: 0..65534 (-4.1768..4.1765 g)
      * Scale: 0.000127465
      * Offset: -4.1768
      */
@@ -509,7 +509,7 @@ struct abs_bremse_51_t {
     /**
      * Used lateral acceleration value in the ABS.
      *
-     * Range: 0..65557.21236854496939256003767 (-4.1768..4.1765 g)
+     * Range: 0..65557 (-4.1768..4.1765 g)
      * Scale: 0.00012742
      * Offset: -4.1768
      */
@@ -910,7 +910,7 @@ struct abs_bremse_53_t {
     /**
      * Brake pressure on the front axle.
      *
-     * Range: -2785.058977719528178243774574..27850.58977719528178243774574 (-42.5..425 bar)
+     * Range: -2785..27851 (-42.5..425 bar)
      * Scale: 0.01526
      * Offset: 0
      */
@@ -1074,7 +1074,7 @@ struct abs_bremse_53_t {
     /**
      * Brake pressure on the rear axle.
      *
-     * Range: -2785.058977719528178243774574..27850.58977719528178243774574 (-42.5..425 bar)
+     * Range: -2785..27851 (-42.5..425 bar)
      * Scale: 0.01526
      * Offset: 0
      */
