@@ -1,4 +1,3 @@
-import contextlib
 from typing import List, Optional, Tuple, Union
 
 from ..typechecking import ByteOrder, Choices, Interval, SignalValueType
@@ -119,60 +118,62 @@ class SignalBase:
 
         raise KeyError(f"Choice {string} not found in data element {self.name}.")
 
-    def _get_offset_scaling_from_list(
-        self, val: float, segments: List[Interval]
-    ) -> Tuple[float, float]:
-        assert not isinstance(self._offset, float) and not isinstance(self._scale, float)
+    def get_offset_and_scaling_for_raw(self, raw_val: float) -> Tuple[float, float]:
+        """Return the applicable offset and scaling factor for a given
+        raw value.
+        """
+        if isinstance(self._offset, (int, float)):
+            assert isinstance(self._scale, (int, float))
+            # global linear scaling
+            return self._offset, self._scale
 
-        for i, segment in enumerate(segments):
-            start, end = segment
-            if start <= val <= end:
-                return self._offset[i], self._scale[i]
+        assert isinstance(self._scale, list)
+        for interval, offset, scale in zip(self.segment_intervals_raw,
+                                           self._offset,
+                                           self._scale,):
+            start, end = interval
+            if start <= raw_val <= end:
+                return offset, scale
         else:
-            err_text = [f"{start} <= x <= {end}" for start, end in segments]
+            err_text = [f"{start} <= x <= {end}" for start, end in self.segment_intervals_raw]
             raise ValueError(
-                f"Value {val} is not in ranges: \n {' OR '.join(err_text)}"
+                f"Value {raw_val} is not in any of the specified intervals: {' OR '.join(err_text)}"
             )
 
-    def get_offset_scaling_from_raw(
-        self, raw_val: Optional[Union[int, float]] = None
-    ) -> Tuple[float, float]:
-        """Get the applicable offset and scaling for the given raw value.
-
-        If data type only defines one set of offset/scaling then
-        the `raw_val` param can be omitted
+    def get_offset_and_scaling_for_scaled(self, scaled_val: float) -> Tuple[float, float]:
+        """Return the applicable offset and scaling factor for a given
+        scaled value.
         """
-        if raw_val is None or not self.segment_intervals_raw:
-            try:
-                return self._offset[0], self._scale[0]  # type: ignore
-            except TypeError:
-                return self.offset, self.scale
+        if isinstance(self._offset, (int, float)):
+            assert isinstance(self._scale, (int, float))
+            # global linear scaling
+            return self._offset, self._scale
 
-        return self._get_offset_scaling_from_list(raw_val, self.segment_intervals_raw)
-
-    def get_offset_scaling_from_scaled(
-        self, scaled_val: Optional[float] = None
-    ) -> Tuple[float, float]:
-        """Get the applicable offset and scaling for the given scaled value.
-
-        If data type only defines one set of offset/scaling then
-        the `scaled_val` param can be omitted
-        """
-        if scaled_val is None or not self.segment_intervals_scaled:
-            try:
-                return self._offset[0], self._scale[0]  # type: ignore
-            except TypeError:
-                return self.offset, self.scale
-
-        return self._get_offset_scaling_from_list(
-            scaled_val, self.segment_intervals_scaled
-        )
+        assert isinstance(self._scale, list)
+        for interval, offset, scale in zip(self.segment_intervals_scaled,
+                                           self._offset,
+                                           self._scale,):
+            start, end = interval
+            if start <= scaled_val <= end:
+                return offset, scale
+        else:
+            err_text = [f"{start} <= x <= {end}" for start, end in self.segment_intervals_raw]
+            raise ValueError(
+                f"Value {scaled_val} is not in any of the specified intervals: {' OR '.join(err_text)}"
+            )
 
     @property
     def offset(self) -> float:
-        """Return first or only offset element"""
+        """Return the offset in the case of global linear scaling
+
+        Raises a ```TypeError``` if piecewise linear scaling is used.
+
+        (For piecewise linear scaling, use
+        ```get_offset_and_scaling_for_{raw,scaled}()```)
+
+        """
         if isinstance(self._offset, list):
-            return self._offset[0]
+            raise TypeError(".offset is not defined piecewise linear functions")
         else:
             return self._offset
 
@@ -185,7 +186,7 @@ class SignalBase:
     def scale(self) -> float:
         """Return first or only scale element"""
         if isinstance(self._scale, list):
-            return self._scale[0]
+            raise TypeError(".scale is not defined piecewise linear functions")
         else:
             return self._scale
 
@@ -194,9 +195,9 @@ class SignalBase:
         """Set scale"""
         self._scale = new_scale
 
-    def raw_to_scaled(
-        self, raw: Union[int, float], decode_choices: bool = True
-    ) -> SignalValueType:
+    def raw_to_scaled(self,
+                      raw_value: Union[int, float],
+                      decode_choices: bool = True) -> SignalValueType:
         """Convert an internal raw value according to the defined scaling or value table.
 
         :param raw:
@@ -207,32 +208,47 @@ class SignalBase:
         :return:
             The calculated scaled value
         """
-        if decode_choices:
-            with contextlib.suppress(KeyError, TypeError):
-                return self.choices[raw]  # type: ignore[index]
 
-        if self.offset == 0 and self.scale == 1:
-            # treat special case to avoid introduction of unnecessary rounding error
-            return raw
-        return raw * self.scale + self.offset
+        # translate the raw value into a string if it is named and
+        # translation requested
+        if decode_choices and self.choices and raw_value in self.choices:
+            assert isinstance(raw_value, int)
+            return self.choices[raw_value]
 
-    def scaled_to_raw(self, scaled: SignalValueType) -> Union[int, float]:
+        # scale the value
+        offset, factor = self.get_offset_and_scaling_for_raw(raw_value)
+
+        if factor == 1 and (isinstance(offset, int) or offset.is_integer()):
+            # avoid unnecessary rounding error if the scaling factor is 1
+            return raw_value + int(offset)
+
+        return float(raw_value*factor + offset)
+
+    def scaled_to_raw(self, scaled_value: SignalValueType) -> Union[int, float]:
         """Convert a scaled value to the internal raw value.
 
         :param scaled:
-            The scaled value.
+            The physical value.
         :return:
             The internal raw value.
         """
-        if isinstance(scaled, (float, int)):
-            _transform = float if self.is_float else round
-            if self.offset == 0 and self.scale == 1:
-                # treat special case to avoid introduction of unnecessary rounding error
-                return _transform(scaled)  # type: ignore[operator,no-any-return]
 
-            return _transform((scaled - self.offset) / self.scale)  # type: ignore[operator,no-any-return]
+        # translate the scaled value into a number if it is an alias
+        if isinstance(scaled_value, (str, NamedSignalValue)):
+            return self.choice_string_to_number(str(scaled_value))
 
-        if isinstance(scaled, (str, NamedSignalValue)):
-            return self.choice_string_to_number(str(scaled))
+        # "unscale" the value. Note that this usually produces a float
+        # value even if the raw value is supposed to be an
+        # integer.
+        offset, factor  = self.get_offset_and_scaling_for_scaled(scaled_value)
 
-        raise TypeError(f"Conversion of type {type(scaled)} is not supported.")
+        if factor == 1 and (isinstance(offset, int) or offset.is_integer()):
+            # avoid unnecessary rounding error if the scaling factor is 1
+            result = scaled_value - int(offset)
+        else:
+            result = (scaled_value - offset)/factor
+
+        if self.is_float:
+            return float(result)
+        else:
+            return round(result)
