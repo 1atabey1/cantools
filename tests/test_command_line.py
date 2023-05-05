@@ -1305,12 +1305,10 @@ BATTERY_VT(
             with patch('sys.argv', argv):
                 cantools._main()
 
-            if sys.version_info[0] > 2:
-                self.assert_files_equal(database_h,
-                                        'tests/files/c_source/' + database_h)
-                self.assert_files_equal(database_c,
-                                        'tests/files/c_source/' + database_c)
-
+            self.assert_files_equal(database_h,
+                                    'tests/files/c_source/' + database_h)
+            self.assert_files_equal(database_c,
+                                    'tests/files/c_source/' + database_c)
             self.assertFalse(os.path.exists(fuzzer_c))
             self.assertFalse(os.path.exists(fuzzer_mk))
 
