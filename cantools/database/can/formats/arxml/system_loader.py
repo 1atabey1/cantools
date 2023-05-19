@@ -1,20 +1,18 @@
 # Load a CAN database in ARXML format.
 import logging
+import numbers
 import re
-from collections import OrderedDict
 from copy import deepcopy
 from decimal import Decimal
 from typing import Any
 
-from ....conversion import BaseConversion, IdentityConversion
-from ....namedsignalvalue import NamedSignalValue
 from ....utils import sort_signals_by_start_bit, type_sort_signals
 from ...bus import Bus
 from ...internal_database import InternalDatabase
 from ...message import Message
 from ...node import Node
 from ...signal import Decimal as SignalDecimal
-from ...signal import Signal
+from ...signal import NamedSignalValue, Signal
 from .bus_specifics import AutosarBusSpecifics
 from .database_specifics import AutosarDatabaseSpecifics
 from .end_to_end_properties import AutosarEnd2EndProperties
@@ -790,8 +788,7 @@ class SystemLoader:
         autosar_specifics._is_general_purpose = \
             (pdu.tag == f'{{{self.xml_namespace}}}N-PDU') or \
             (pdu.tag == f'{{{self.xml_namespace}}}GENERAL-PURPOSE-PDU') or \
-            (pdu.tag == f'{{{self.xml_namespace}}}GENERAL-PURPOSE-I-PDU') or \
-            (pdu.tag == f'{{{self.xml_namespace}}}USER-DEFINED-I-PDU')
+            (pdu.tag == f'{{{self.xml_namespace}}}GENERAL-PURPOSE-I-PDU')
         is_secured = \
             (pdu.tag == f'{{{self.xml_namespace}}}SECURED-I-PDU')
 
@@ -886,8 +883,9 @@ class SystemLoader:
                                   start=payload_length*8 + 7,
                                   length=fresh_tx_len,
                                   byte_order='big_endian',
-                                  conversion=IdentityConversion(is_float=False),
-                                  decimal=SignalDecimal(Decimal(1), Decimal(0)),
+                                  offset=0,
+                                  scale=1,
+                                  decimal = SignalDecimal(Decimal(1), Decimal(0)),
                                   comment=\
                                   {'FOR-ALL':
                                    f'Truncated freshness value for '
@@ -898,7 +896,8 @@ class SystemLoader:
                                   start=n0,
                                   length=auth_tx_len,
                                   byte_order='big_endian',
-                                  conversion=IdentityConversion(is_float=False),
+                                  offset=0,
+                                  scale=1,
                                   decimal = SignalDecimal(Decimal(1), Decimal(0)),
                                   comment=\
                                   { 'FOR-ALL':
@@ -1105,7 +1104,7 @@ class SystemLoader:
 
         if is_multiplexed:
             # multiplexed signals
-            pdu_signals, cycle_time, child_pdu_paths = \
+            pdu_signals, child_pdu_paths = \
                 self._load_multiplexed_pdu(pdu, frame_name, next_selector_idx)
             signals.extend(pdu_signals)
 
@@ -1144,8 +1143,10 @@ class SystemLoader:
             start=selector_pos,
             length=selector_len,
             byte_order=selector_byte_order,
-            conversion=IdentityConversion(is_float=False),
-            decimal=SignalDecimal(Decimal(1), Decimal(0)),
+            offset=0,
+            scale=1,
+            decimal = SignalDecimal(Decimal(1), Decimal(0)),
+            choices={},
             is_multiplexer=True,
         )
         next_selector_idx += 1
@@ -1165,11 +1166,6 @@ class SystemLoader:
                 'DYNAMIC-PART-ALTERNATIVES',
                 '*DYNAMIC-PART-ALTERNATIVE',
             ]
-
-        selector_signal_choices = OrderedDict()
-
-        # the cycle time of the message
-        cycle_time = None
 
         for dynalt in self._get_arxml_children(pdu, dynpart_spec):
             dynalt_selector_value = \
@@ -1192,16 +1188,6 @@ class SystemLoader:
                 = self._load_pdu(dynalt_pdu, frame_name, next_selector_idx)
             child_pdu_paths.extend(dynalt_child_pdu_paths)
 
-            # cantools does not a concept for the cycle time of
-            # individual PDUs, but only one for whole messages. We
-            # thus use the minimum cycle time of any dynamic part
-            # alternative as the cycle time of the multiplexed message
-            if dynalt_cycle_time is not None:
-                if cycle_time is not None:
-                    cycle_time = min(cycle_time, dynalt_cycle_time)
-                else:
-                    cycle_time = dynalt_cycle_time
-
             is_initial = \
                 self._get_unique_arxml_child(dynalt, 'INITIAL-DYNAMIC-PART')
             is_initial = \
@@ -1209,8 +1195,8 @@ class SystemLoader:
                 if is_initial is not None and is_initial.text == 'true' \
                 else False
             if is_initial:
-                assert selector_signal.raw_initial is None
-                selector_signal.raw_initial = dynalt_selector_value
+                assert selector_signal.initial is None
+                selector_signal.initial = dynalt_selector_value
 
             # remove the selector signal from the dynamic part (because it
             # logically is in the static part, despite the fact that AUTOSAR
@@ -1223,7 +1209,7 @@ class SystemLoader:
             assert dselsig.length == selector_len
 
             if dynalt_selector_signals[0].choices is not None:
-                selector_signal_choices.update(dynalt_selector_signals[0].choices)
+                selector_signal.choices.update(dynalt_selector_signals[0].choices)
 
             if dynalt_selector_signals[0].invalid is not None:
                 # TODO: this may lead to undefined behaviour if
@@ -1250,19 +1236,14 @@ class SystemLoader:
             # specified indepently of that of the message. how should
             # this be handled?
 
-        if selector_signal_choices:
-            selector_signal.conversion = BaseConversion.factory(
-                scale=1,
-                offset=0,
-                choices=selector_signal_choices,
-                is_float=False,
-            )
+        if selector_signal.initial in selector_signal.choices:
+            selector_signal.initial = \
+                selector_signal.choices[selector_signal.initial]
 
-        if selector_signal.raw_initial is not None:
-            selector_signal.initial = selector_signal.raw_to_scaled(selector_signal.raw_initial)
-
-        if selector_signal.raw_invalid is not None:
-            selector_signal.invalid = selector_signal.raw_to_scaled(selector_signal.raw_invalid)
+        if not isinstance(selector_signal.invalid, NamedSignalValue) and \
+           selector_signal.invalid in selector_signal.choices:
+            selector_signal.invalid = \
+                selector_signal.choices[selector_signal.invalid]
 
         # the static part of the multiplexed PDU
         if self.autosar_version_newer(4):
@@ -1301,7 +1282,7 @@ class SystemLoader:
             child_pdu_paths.extend(static_child_pdu_paths)
             signals.extend(static_signals)
 
-        return signals, cycle_time, child_pdu_paths
+        return signals, child_pdu_paths
 
     def _load_pdu_signals(self, pdu):
         signals = []
@@ -1373,11 +1354,7 @@ class SystemLoader:
 
         for l_2 in self._get_arxml_children(node, ['DESC', '*L-2']):
             lang = l_2.attrib.get('L', 'EN')
-
-            # remove leading and trailing white space from each line
-            # of multi-line comments
-            tmp = [ x.strip() for x in l_2.text.split('\n') ]
-            result[lang] = '\n'.join(tmp)
+            result[lang] = l_2.text
 
         if len(result) == 0:
             return None
@@ -1454,7 +1431,7 @@ class SystemLoader:
             return None
 
         # Get the system signal XML node. This may also be a system signal
-        # group, in which case we have to ignore it if the XSD is to be believed.
+        # group, in which case we have ignore it if the XSD is to be believed.
         # ARXML is great!
         system_signal = self._get_unique_arxml_child(i_signal, '&SYSTEM-SIGNAL')
 
@@ -1463,7 +1440,8 @@ class SystemLoader:
             return None
 
         # Default values.
-        raw_initial = None
+        initial = None
+        invalid = None
         minimum = None
         maximum = None
         factor = 1.0
@@ -1499,52 +1477,54 @@ class SystemLoader:
 
         # loading initial values is way too complicated, so it is the
         # job of a separate method
-        initial_string = self._load_arxml_init_value_string(i_signal, system_signal)
-        if initial_string is not None:
+        initial = self._load_arxml_init_value_string(i_signal, system_signal)
+
+        if initial is not None:
+            initial_int = None
             try:
-                raw_initial = parse_number_string(initial_string)
+                initial_int = parse_number_string(initial)
             except ValueError:
-                LOGGER.warning(f'The initial value ("{initial_string}") of signal '
+                LOGGER.warning(f'The initial value ("{initial}") of signal '
                                f'{name} does not represent a number')
 
-        raw_invalid = self._load_arxml_invalid_int_value(i_signal, system_signal)
+            if choices is not None and initial_int in choices:
+                initial = choices[initial_int]
+            elif is_float:
+                initial = float(initial_int)*factor + offset
+            # TODO: strings?
+            elif initial_int is not None:
+                initial = initial_int*factor + offset
 
-        conversion = BaseConversion.factory(
-            scale=factor,
-            offset=offset,
-            choices=choices,
-            is_float=is_float,
-        )
+        invalid = self._load_arxml_invalid_int_value(i_signal, system_signal)
 
-        signal = Signal(
-            name=name,
-            start=start_position,
-            length=length,
-            receivers=receivers,
-            byte_order=byte_order,
-            is_signed=is_signed,
-            conversion=conversion,
-            raw_initial=raw_initial,
-            raw_invalid=raw_invalid,
-            minimum=minimum,
-            maximum=maximum,
-            unit=unit,
-            comment=comments,
-            decimal=decimal,
-        )
-        return signal
+        if invalid is not None:
+            if choices is not None and invalid in choices:
+                invalid = choices[invalid]
+            elif not isinstance(invalid, bool) and \
+                 isinstance(invalid, numbers.Number):
+                invalid = invalid*factor + offset
+
+        return Signal(name=name,
+                      start=start_position,
+                      length=length,
+                      receivers=receivers,
+                      byte_order=byte_order,
+                      is_signed=is_signed,
+                      scale=factor,
+                      offset=offset,
+                      initial=initial,
+                      invalid=invalid,
+                      minimum=minimum,
+                      maximum=maximum,
+                      unit=unit,
+                      choices=choices,
+                      comment=comments,
+                      is_float=is_float,
+                      decimal=decimal)
 
     def _load_signal_name(self, i_signal):
-        system_signal_name_elem = \
-            self._get_unique_arxml_child(i_signal,
-                                         [
-                                             '&SYSTEM-SIGNAL',
-                                             'SHORT-NAME'
-                                         ])
-        if system_signal_name_elem:
-            return system_signal_name_elem.text
-
-        return self._get_unique_arxml_child(i_signal, 'SHORT-NAME').text
+        return self._get_unique_arxml_child(i_signal,
+                                            'SHORT-NAME').text
 
     def _load_signal_start_position(self, i_signal_to_i_pdu_mapping):
         pos = self._get_unique_arxml_child(i_signal_to_i_pdu_mapping,

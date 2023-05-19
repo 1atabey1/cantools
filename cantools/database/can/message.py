@@ -2,16 +2,7 @@
 
 import logging
 from copy import deepcopy
-from typing import (
-    TYPE_CHECKING,
-    Dict,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Dict, List, Optional, Set, Tuple, Union, cast
 
 from ...typechecking import (
     Codec,
@@ -28,7 +19,6 @@ from ...typechecking import (
     SignalMappingType,
 )
 from ..errors import DecodeError, EncodeError, Error
-from ..namedsignalvalue import NamedSignalValue
 from ..utils import (
     SORT_SIGNALS_DEFAULT,
     create_encode_decode_formats,
@@ -39,7 +29,7 @@ from ..utils import (
     start_bit,
     type_sort_signals,
 )
-from .signal import Signal
+from .signal import NamedSignalValue, Signal
 from .signal_group import SignalGroup
 
 if TYPE_CHECKING:
@@ -184,8 +174,8 @@ class Message:
                 # enumeration. Here we ensure that any named
                 # multiplexer is included, even if it has no child
                 # signals.
-                if signal.conversion.choices:
-                    children_ids.update(signal.conversion.choices.keys())
+                if signal.choices:
+                    children_ids.update(signal.choices.keys())
 
                 for child_id in children_ids:
                     codec = self._create_codec(signal.name, child_id)
@@ -727,7 +717,7 @@ class Message:
         if isinstance(mux, str) or isinstance(mux, NamedSignalValue):
             signal = self.get_signal_by_name(signal_name)
             try:
-                mux = signal.conversion.choice_to_number(str(mux))
+                mux = signal.choice_string_to_number(str(mux))
             except KeyError:
                 raise EncodeError() from None
         return int(mux)
@@ -741,7 +731,7 @@ class Message:
 
             if isinstance(signal_value, (str, NamedSignalValue)):
                 # Check choices
-                signal_value_num = signal.conversion.choice_to_number(str(signal_value))
+                signal_value_num = signal.choice_string_to_number(str(signal_value))
 
                 if signal_value_num is None:
                     raise EncodeError(f'Invalid value specified for signal '
@@ -755,9 +745,9 @@ class Message:
                 # undo the scaling of the signal's minimum value if we
                 # are not supposed to scale the input value
                 if not scaling:
-                    min_effective = signal.conversion.numeric_scaled_to_raw(signal.minimum)
+                    min_effective = (signal.minimum - signal.offset)/signal.scale
 
-                if signal_value < min_effective - signal.conversion.scale*1e-6:
+                if signal_value < min_effective - signal.scale*1e-6:
                     raise EncodeError(
                         f'Expected signal "{signal.name}" value greater than '
                         f'or equal to {min_effective} in message "{self.name}", '
@@ -769,12 +759,12 @@ class Message:
                 if not scaling:
                     # undo the scaling of the signal's maximum value if we
                     # are not supposed to scale the input value
-                    max_effective = signal.conversion.numeric_scaled_to_raw(signal.maximum)
+                    max_effective = (signal.maximum - signal.offset)/signal.scale
 
-                if signal_value > max_effective + signal.conversion.scale*1e-6:
+                if signal_value > max_effective + signal.scale*1e-6:
                     raise EncodeError(
-                        f'Expected signal "{signal.name}" value smaller than '
-                        f'or equal to {max_effective} in message "{self.name}", '
+                        f'Expected signal "{signal.name}" value less than or '
+                        f'equal to {max_effective} in message "{self.name}", '
                         f'but got {signal_value}.')
 
     def _encode(self, node: Codec, data: SignalMappingType, scaling: bool) -> Tuple[int, int, List[Signal]]:
@@ -835,7 +825,7 @@ class Message:
 
             if contained_message is None:
                 if isinstance(value, bytes) and isinstance(header, int):
-                    # the contained message was specified as raw data
+                    # the contained message waw specified as raw data
                     header_id = header
                 else:
                     raise EncodeError(f'No message corresponding to header '
@@ -877,7 +867,7 @@ class Message:
                                    3,
                                    hbo) # type: ignore
             result += int.to_bytes(len(contained_payload), 1, 'big')
-            result += bytes(contained_payload)
+            result += contained_payload
 
         return result
 
@@ -1045,9 +1035,9 @@ class Message:
             pos += 4+contained_len
 
             if contained_msg is None:
-                result.append((contained_id, bytes(contained_data)))
+                result.append((contained_id, contained_data))
             else:
-                result.append((contained_msg, bytes(contained_data)))
+                result.append((contained_msg, contained_data))
 
         return result
 
@@ -1118,7 +1108,7 @@ class Message:
         elif self._codecs is None:
             raise ValueError('Codec is not initialized.')
 
-        data = bytes(data[:self._length])
+        data = data[:self._length]
 
         return self._decode(self._codecs,
                             data,
@@ -1148,7 +1138,7 @@ class Message:
 
         for contained_message, contained_data in unpacked:
             if not isinstance(contained_message, Message):
-                result.append((contained_message, bytes(contained_data)))
+                result.append((contained_message, contained_data))
                 continue
 
             decoded = contained_message.decode(contained_data,

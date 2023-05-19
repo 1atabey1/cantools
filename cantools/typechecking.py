@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     import os
 
     from .database import Message, Signal
-    from .database.namedsignalvalue import NamedSignalValue
+    from .database.can.signal import NamedSignalValue
 
 
 class Formats(NamedTuple):
@@ -47,7 +47,7 @@ Choices = OrderedDict[int, Union[str, "NamedSignalValue"]]
 # Type aliases. Introduced to reduce type annotation complexity while
 # allowing for more complex encode/decode schemes like the one used
 # for AUTOSAR container messages.
-SignalValueType = Union[int, float, str, "NamedSignalValue"]
+SignalValueType = Union[float, str, "NamedSignalValue"]
 SignalDictType = Dict[str, SignalValueType]
 SignalMappingType = Mapping[str, SignalValueType]
 ContainerHeaderSpecType = Union["Message", str, int]
@@ -65,4 +65,6 @@ ContainerEncodeInputType = Sequence[
 DecodeResultType = Union[SignalDictType, ContainerDecodeResultType]
 EncodeInputType = Union[SignalMappingType, ContainerEncodeInputType]
 
-SecOCAuthenticatorFn = Callable[["Message", bytes, int], bytes]
+SecOCAuthenticatorFn = Callable[["Message", bytearray, int], bytearray]
+
+PiecewiseSegment = List[Tuple[float, float]]

@@ -1,8 +1,11 @@
-from typing import Iterable
+from typing import (
+    Iterable,
+    Union,
+)
 
 from ..database.can.database import Database
 from ..database.can.message import Message
-from ..database.namedsignalvalue import NamedSignalValue
+from ..database.can.signal import NamedSignalValue
 from ..typechecking import (
     ContainerDecodeResultType,
     ContainerUnpackResultType,
@@ -72,7 +75,7 @@ def _format_container_single_line(message : Message,
             data = unpacked_data[i][1]
             contained_list.append(
                 f'(Unknown contained message: Header ID: 0x{header_id:x}, '
-                f'Data: {bytes(data).hex()})')
+                f'Data: {data.hex()})')
 
     return f' {message.name}({", ".join(contained_list)})'
 
@@ -85,7 +88,7 @@ def _format_container_multi_line(message : Message,
         if isinstance(cm, Message):
             formatted_cm_signals = _format_signals(cm, signals)
             formatted_cm = f'{cm.header_id:06x}##'
-            formatted_cm += f'{bytes(unpacked_data[i][1]).hex()} ::'
+            formatted_cm += f'{unpacked_data[i][1].hex()} ::'
             formatted_cm += _format_message_multi_line(cm, formatted_cm_signals)
             formatted_cm = formatted_cm.replace('\n', '\n    ')
             contained_list.append('    '+formatted_cm.strip())
@@ -94,7 +97,7 @@ def _format_container_multi_line(message : Message,
             data = unpacked_data[i][1]
             contained_list.append(
                 f'    Unknown contained message (Header ID: 0x{header_id:x}, '
-                f'Data: {bytes(data).hex()})')
+                f'Data: {data.hex()})')
 
     return \
         f'\n{message.name}(\n' + \
@@ -103,7 +106,7 @@ def _format_container_multi_line(message : Message,
 
 def format_message_by_frame_id(dbase : Database,
                                frame_id : int,
-                               data : bytes,
+                               data : Union[bytes, bytearray],
                                decode_choices : bool,
                                single_line : bool,
                                decode_containers : bool) -> str:
@@ -124,7 +127,7 @@ def format_message_by_frame_id(dbase : Database,
     return format_message(message, data, decode_choices, single_line)
 
 def format_container_message(message : Message,
-                             data : bytes,
+                             data : Union[bytes, bytearray],
                              decode_choices : bool,
                              single_line : bool,
                              allow_truncated : bool = False) -> str:
@@ -150,7 +153,7 @@ def format_container_message(message : Message,
 
 
 def format_message(message : Message,
-                   data : bytes,
+                   data : Union[bytes, bytearray],
                    decode_choices : bool,
                    single_line : bool,
                    allow_truncated : bool = False) -> str:
@@ -169,7 +172,7 @@ def format_message(message : Message,
         return _format_message_multi_line(message, formatted_signals)
 
 def format_multiplexed_name(message : Message,
-                            data : bytes,
+                            data : Union[bytes, bytearray],
                             decode_choices : bool,
                             allow_truncated : bool = False) -> str:
     decoded_signals : SignalDictType \
@@ -189,8 +192,8 @@ def format_multiplexed_name(message : Message,
         if signal.is_multiplexer:
             if signal.name in decoded_signals:
                 result.append(str(decoded_signals[signal.name]))
-            elif signal.raw_initial is not None:
-                result.append(str(signal.raw_initial))
+            elif signal.initial is not None:
+                result.append(str(signal.initial))
             else:
                 result.append('0')
 

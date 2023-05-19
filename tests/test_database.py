@@ -25,7 +25,7 @@ except ImportError:
 import cantools
 from cantools.database.can.formats import dbc
 from cantools.database import UnsupportedDatabaseFormatError
-from cantools.database.namedsignalvalue import NamedSignalValue
+from cantools.database.can.signal import NamedSignalValue
 
 class CanToolsDatabaseTest(unittest.TestCase):
 
@@ -108,20 +108,16 @@ class CanToolsDatabaseTest(unittest.TestCase):
             "set, invalid when bit is clear.'})")
 
         signal = message.get_signal_by_name('Validity_Accel_Lateral')
-        self.assertEqual(signal.raw_initial, 1)
         self.assertEqual(signal.initial, 1)
 
         signal = message.get_signal_by_name('Validity_Accel_Vertical')
-        self.assertEqual(signal.raw_initial, 0)
         self.assertEqual(signal.initial, 0)
 
         signal = message.get_signal_by_name('Accuracy_Accel')
-        self.assertEqual(signal.raw_initial, 127)
         self.assertEqual(signal.initial, 127)
 
         signal = message.get_signal_by_name('Accel_Longitudinal')
-        self.assertEqual(signal.raw_initial, 32767)
-        self.assertEqual(signal.initial, 32.767)
+        self.assertEqual(signal.initial, 32767)
         self.assertEqual(
             repr(signal),
             "signal('Accel_Longitudinal', 16, 16, 'little_endian', True, 32767, "
@@ -130,12 +126,10 @@ class CanToolsDatabaseTest(unittest.TestCase):
             "forwards direction.'})")
 
         signal = message.get_signal_by_name('Accel_Lateral')
-        self.assertEqual(signal.raw_initial, -30000)
-        self.assertEqual(signal.initial, -30.0)
+        self.assertEqual(signal.initial, -30000)
 
         signal = message.get_signal_by_name('Accel_Vertical')
-        self.assertEqual(signal.raw_initial, 16120)
-        self.assertEqual(signal.initial, 16.120)
+        self.assertEqual(signal.initial, 16120)
 
     def test_motohawk(self):
         filename = 'tests/files/dbc/motohawk.dbc'
@@ -780,7 +774,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             (
                 'Message1',
                 3,
-                'Expected signal "Signal1" value smaller than or equal to 2 in '
+                'Expected signal "Signal1" value less than or equal to 2 in '
                 'message "Message1", but got 3.'
             ),
             (
@@ -792,7 +786,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             (
                 'Message3',
                 3,
-                'Expected signal "Signal1" value smaller than or equal to 2 in '
+                'Expected signal "Signal1" value less than or equal to 2 in '
                 'message "Message3", but got 3.'
             ),
             (
@@ -804,7 +798,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
             (
                 'Message4',
                 8.1,
-                'Expected signal "Signal1" value smaller than or equal to 8 in '
+                'Expected signal "Signal1" value less than or equal to 8 in '
                 'message "Message4", but got 8.1.'
             )
         ]
@@ -837,25 +831,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         # Missing value, but checks disabled.
         with self.assertRaises(KeyError):
             db.encode_message('Message1', {'Foo': 1}, strict=False)
-
-    def test_encode_decimal(self):
-        db = cantools.db.Database()
-        db.add_dbc_file('tests/files/dbc/motohawk.dbc')
-
-        data = {
-            'Temperature': Decimal(250.55),
-            'AverageRadius': 3.2,
-            'Enable': 1
-        }
-
-        msg = db.get_message_by_name('ExampleMessage')
-
-        with self.assertRaises(TypeError) as cm:
-            msg.encode(data)
-            self.assertEqual(
-                str(cm.exception),
-                "Unable to encode signal 'Temperature' with type 'Decimal'.",
-            )
 
     def test_encode_decode_no_scaling_no_decode_choices(self):
         """Encode and decode a message without scaling the signal values, not
@@ -4047,6 +4022,9 @@ class CanToolsDatabaseTest(unittest.TestCase):
 
         """
 
+        if sys.version_info < (3, 8):
+            return
+
         filename = 'tests/files/kcd/dump.kcd'
         db = cantools.database.load_file(filename)
 
@@ -4571,7 +4549,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_selector.decimal.minimum, None)
         self.assertEqual(mux_signal_selector.decimal.maximum, None)
         self.assertEqual(mux_signal_selector.unit, None)
-        self.assertEqual(mux_signal_selector.choices, None)
+        self.assertEqual(mux_signal_selector.choices, {})
         self.assertEqual(mux_signal_selector.comments, None)
         self.assertEqual(mux_signal_selector.is_multiplexer, True)
         self.assertEqual(mux_signal_selector.multiplexer_signal , None)
@@ -4631,7 +4609,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_world2.length, 1)
         self.assertEqual(mux_signal_world2.receivers, [])
         self.assertEqual(mux_signal_world2.byte_order, 'little_endian')
-        self.assertEqual(mux_signal_world2.raw_initial, None)
         self.assertEqual(mux_signal_world2.initial, None)
         self.assertEqual(mux_signal_world2.is_signed, False)
         self.assertEqual(mux_signal_world2.is_float, False)
@@ -4656,7 +4633,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_world1.length, 2)
         self.assertEqual(mux_signal_world1.receivers, [])
         self.assertEqual(mux_signal_world1.byte_order, 'little_endian')
-        self.assertEqual(mux_signal_world1.raw_initial, None)
         self.assertEqual(mux_signal_world1.initial, None)
         self.assertEqual(mux_signal_world1.is_signed, False)
         self.assertEqual(mux_signal_world1.is_float, False)
@@ -4697,7 +4673,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.length, 8)
         self.assertEqual(signal_1.receivers, [])
         self.assertEqual(signal_1.byte_order, 'little_endian')
-        self.assertEqual(signal_1.raw_initial, None)
         self.assertEqual(signal_1.initial, None)
         self.assertEqual(signal_1.is_signed, False)
         self.assertEqual(signal_1.is_float, False)
@@ -4721,7 +4696,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.length, 4)
         self.assertEqual(signal_2.receivers, [])
         self.assertEqual(signal_2.byte_order, 'little_endian')
-        self.assertEqual(signal_2.raw_initial, None)
         self.assertEqual(signal_2.initial, None)
         self.assertEqual(signal_2.is_signed, False)
         self.assertEqual(signal_2.is_float, False)
@@ -4745,7 +4719,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.length, 1)
         self.assertEqual(signal_3.receivers, [])
         self.assertEqual(signal_3.byte_order, 'little_endian')
-        self.assertEqual(signal_3.raw_initial, False)
         self.assertEqual(signal_3.initial, False)
         self.assertEqual(signal_3.is_signed, False)
         self.assertEqual(signal_3.is_float, False)
@@ -4769,7 +4742,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_4.length, 1)
         self.assertEqual(signal_4.receivers, [])
         self.assertEqual(signal_4.byte_order, 'little_endian')
-        self.assertEqual(signal_4.raw_initial, True)
         self.assertEqual(signal_4.initial, True)
         self.assertEqual(signal_4.is_signed, False)
         self.assertEqual(signal_4.is_float, False)
@@ -4870,7 +4842,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_message.name, 'MultiplexedMessage')
         self.assertEqual(mux_message.length, 2)
         self.assertEqual(mux_message.unused_bit_pattern, 0xff)
-        self.assertEqual(mux_message.senders, ['Dancer'])
+        self.assertEqual(mux_message.senders, [])
         self.assertEqual(mux_message.send_type, None)
         self.assertEqual(mux_message.cycle_time, None)
         self.assertEqual(len(mux_message.signals), 6)
@@ -4890,9 +4862,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_static.name, 'MultiplexedStatic')
         self.assertEqual(mux_signal_static.start, 0)
         self.assertEqual(mux_signal_static.length, 3)
-        self.assertEqual(mux_signal_static.raw_initial, 7)
         self.assertEqual(mux_signal_static.initial, 7)
-        self.assertEqual(mux_signal_static.receivers, ['DJ'])
+        self.assertEqual(mux_signal_static.receivers, [])
         self.assertEqual(mux_signal_static.byte_order, 'little_endian')
         self.assertEqual(mux_signal_static.is_signed, True)
         self.assertEqual(mux_signal_static.is_float, False)
@@ -4915,9 +4886,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_hello.name, 'Hello')
         self.assertEqual(mux_signal_hello.start, 3)
         self.assertEqual(mux_signal_hello.length, 3)
-        self.assertEqual(mux_signal_hello.raw_initial, 0)
         self.assertEqual(mux_signal_hello.initial, 0)
-        self.assertEqual(mux_signal_hello.receivers, ['DJ'])
+        self.assertEqual(mux_signal_hello.receivers, [])
         self.assertEqual(mux_signal_hello.byte_order, 'little_endian')
         self.assertEqual(mux_signal_hello.is_signed, True)
         self.assertEqual(mux_signal_hello.is_float, False)
@@ -4941,9 +4911,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_world2.name, 'World2')
         self.assertEqual(mux_signal_world2.start, 3)
         self.assertEqual(mux_signal_world2.length, 1)
-        self.assertEqual(mux_signal_world2.raw_initial, 0)
         self.assertEqual(mux_signal_world2.initial, 0)
-        self.assertEqual(mux_signal_world2.receivers, ['DJ'])
+        self.assertEqual(mux_signal_world2.receivers, [])
         self.assertEqual(mux_signal_world2.byte_order, 'little_endian')
         self.assertEqual(mux_signal_world2.is_signed, True)
         self.assertEqual(mux_signal_world2.is_float, False)
@@ -4967,9 +4936,8 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(mux_signal_world1.name, 'World1')
         self.assertEqual(mux_signal_world1.start, 4)
         self.assertEqual(mux_signal_world1.length, 2)
-        self.assertEqual(mux_signal_world1.raw_initial, 3)
         self.assertEqual(mux_signal_world1.initial, 3)
-        self.assertEqual(mux_signal_world1.receivers, ['DJ'])
+        self.assertEqual(mux_signal_world1.receivers, [])
         self.assertEqual(mux_signal_world1.byte_order, 'little_endian')
         self.assertEqual(mux_signal_world1.is_signed, True)
         self.assertEqual(mux_signal_world1.is_float, False)
@@ -5017,7 +4985,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.name, 'message1_SeqCounter')
         self.assertEqual(signal_1.start, 0)
         self.assertEqual(signal_1.length, 16)
-        self.assertEqual(signal_1.raw_initial, None)
         self.assertEqual(signal_1.initial, None)
         self.assertEqual(signal_1.receivers, ['Dancer'])
         self.assertEqual(signal_1.byte_order, 'little_endian')
@@ -5041,7 +5008,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.name, 'message1_CRC')
         self.assertEqual(signal_2.start, 16)
         self.assertEqual(signal_2.length, 16)
-        self.assertEqual(signal_2.raw_initial, None)
         self.assertEqual(signal_2.initial, None)
         self.assertEqual(signal_2.receivers, ['Dancer'])
         self.assertEqual(signal_2.byte_order, 'little_endian')
@@ -5065,7 +5031,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.name, 'signal6')
         self.assertEqual(signal_3.start, 32)
         self.assertEqual(signal_3.length, 1)
-        self.assertEqual(signal_3.raw_initial, 0)
         self.assertEqual(signal_3.initial, 'zero')
         self.assertEqual(signal_3.receivers, ['Dancer'])
         self.assertEqual(signal_3.byte_order, 'little_endian')
@@ -5089,7 +5054,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_4.name, 'signal1')
         self.assertEqual(signal_4.start, 36)
         self.assertEqual(signal_4.length, 3)
-        self.assertEqual(signal_4.raw_initial, 5)
         self.assertEqual(signal_4.initial, 25.0)
         self.assertEqual(signal_4.receivers, ['Dancer'])
         self.assertEqual(signal_4.byte_order, 'big_endian')
@@ -5121,7 +5085,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         signal_5 = message_1.signals[4]
         self.assertEqual(signal_5.name, 'signal5')
         self.assertEqual(signal_5.start, 40)
-        self.assertEqual(signal_5.raw_initial, None)
         self.assertEqual(signal_5.initial, None)
         self.assertEqual(signal_5.length, 32)
         self.assertEqual(signal_5.receivers, ['Dancer'])
@@ -5233,7 +5196,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_3.name, 'Message3')
         self.assertEqual(message_3.length, 6)
         self.assertEqual(message_3.unused_bit_pattern, 0xff)
-        self.assertEqual(message_3.senders, ['Dancer'])
+        self.assertEqual(message_3.senders, [])
         self.assertEqual(message_3.send_type, None)
         self.assertEqual(message_3.cycle_time, None)
         self.assertEqual(len(message_3.signals), 4)
@@ -5251,7 +5214,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.name, 'message3_CRC')
         self.assertEqual(signal_1.start, 0)
         self.assertEqual(signal_1.length, 8)
-        self.assertEqual(signal_1.receivers, ['DJ'])
+        self.assertEqual(signal_1.receivers, [])
         self.assertEqual(signal_1.byte_order, 'little_endian')
         self.assertEqual(signal_1.is_signed, False)
         self.assertEqual(signal_1.is_float, False)
@@ -5273,7 +5236,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.name, 'message3_SeqCounter')
         self.assertEqual(signal_2.start, 8)
         self.assertEqual(signal_2.length, 4)
-        self.assertEqual(signal_2.receivers, ['DJ'])
+        self.assertEqual(signal_2.receivers, [])
         self.assertEqual(signal_2.byte_order, 'little_endian')
         self.assertEqual(signal_2.is_signed, False)
         self.assertEqual(signal_2.is_float, False)
@@ -5295,7 +5258,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_3.name, 'Message3_Freshness')
         self.assertEqual(signal_3.start, 39)
         self.assertEqual(signal_3.length, 6)
-        self.assertEqual(signal_3.receivers, ['DJ'])
+        self.assertEqual(signal_3.receivers, [])
         self.assertEqual(signal_3.byte_order, 'big_endian')
         self.assertEqual(signal_3.is_signed, False)
         self.assertEqual(signal_3.is_float, False)
@@ -5317,7 +5280,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_4.name, 'Message3_Authenticator')
         self.assertEqual(signal_4.start, 33)
         self.assertEqual(signal_4.length, 10)
-        self.assertEqual(signal_4.receivers, ['DJ'])
+        self.assertEqual(signal_4.receivers, [])
         self.assertEqual(signal_4.byte_order, 'big_endian')
         self.assertEqual(signal_4.is_signed, False)
         self.assertEqual(signal_4.is_float, False)
@@ -5343,7 +5306,7 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(message_4.name, 'Message4')
         self.assertEqual(message_4.length, 6)
         self.assertEqual(message_4.unused_bit_pattern, 0x55)
-        self.assertEqual(message_4.senders, ['DJ'])
+        self.assertEqual(message_4.senders, [])
         self.assertEqual(message_4.send_type, None)
         self.assertEqual(message_4.cycle_time, None)
         self.assertEqual(len(message_4.signals), 3)
@@ -5523,7 +5486,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.length, 1)
         self.assertEqual(signal_1.receivers, [])
         self.assertEqual(signal_1.byte_order, 'little_endian')
-        self.assertEqual(signal_1.raw_initial, 0)
         self.assertEqual(signal_1.initial, 0)
         self.assertEqual(signal_1.is_signed, False)
         self.assertEqual(signal_1.is_float, False)
@@ -5612,7 +5574,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_1.length, 7)
         self.assertEqual(signal_1.receivers, [])
         self.assertEqual(signal_1.byte_order, 'big_endian')
-        self.assertEqual(signal_1.raw_initial, 0)
         self.assertEqual(signal_1.initial, 0.0)
         self.assertEqual(signal_1.is_signed, False)
         self.assertEqual(signal_1.is_float, False)
@@ -5637,7 +5598,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         self.assertEqual(signal_2.length, 5)
         self.assertEqual(signal_2.receivers, [])
         self.assertEqual(signal_2.byte_order, 'big_endian')
-        self.assertEqual(signal_2.raw_initial, 0)
         self.assertEqual(signal_2.initial, 0.0)
         self.assertEqual(signal_2.is_signed, False)
         self.assertEqual(signal_2.is_float, False)
@@ -6396,26 +6356,6 @@ class CanToolsDatabaseTest(unittest.TestCase):
         long_output = db.as_dbc_string(shorten_long_names=False)
 
         self.assertNotIn('BA_ "SystemSignalLongSymbol"', long_output)
-
-    def test_fd_detection(self):
-        filename = "tests/files/dbc/fd_test.dbc"
-        db = cantools.db.load_file(filename)
-
-        msgfdex = db.get_message_by_name('TestMsg_FDEx')
-        self.assertEqual(True, msgfdex.is_fd)
-        self.assertEqual(True, msgfdex.is_extended_frame)
-
-        msgfdstd = db.get_message_by_name('TestMsg_FDStd')
-        self.assertEqual(True, msgfdstd.is_fd)
-        self.assertEqual(False, msgfdstd.is_extended_frame)
-
-        msgstd = db.get_message_by_name('TestMsg_Std')
-        self.assertEqual(False, msgstd.is_fd)
-        self.assertEqual(False, msgstd.is_extended_frame)
-
-        msgex = db.get_message_by_name('TestMsg_Ex')
-        self.assertEqual(False, msgex.is_fd)
-        self.assertEqual(True, msgex.is_extended_frame)
 
 
 # This file is not '__main__' when executed via 'python setup.py3

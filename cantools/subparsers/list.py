@@ -1,44 +1,11 @@
 import argparse
-from typing import Any, Union
 
 import cantools
 
-from ..database import Bus, Database, Message, Node
-from ..database.diagnostics.database import Database as DiagnosticsDatabase
-from ..database.namedsignalvalue import NamedSignalValue
 from .dump.formatting import signal_tree_string
 
 
-def _format_val(val: Union[float, int, str, NamedSignalValue, None],
-                unit: str,
-                value_format_specifier: str) \
-        -> str:
-    """Returns signal value formatted according to a format specifier
-
-    e.g.
-    - ``_format_val(1.234, 'm', '%.2f')`` results in '1.23 m'
-    - ``_format_val('IAmAnEnum', 'm', '%.2f')`` results in 'IAmAnEnum'
-    - ``_format_val(1.234)`` results in '1.234'
-    """
-    if val is None:
-        return 'None'
-    elif not unit or isinstance(val, (str, NamedSignalValue)):
-        # physical value does not exhibit a unit or is an enumeration
-        return f'{val:{value_format_specifier}}'
-
-    return f'{val:{value_format_specifier}} {unit}'
-
-
-def _print_message(message: Message,
-                   indent: str = '',
-                   print_format_specifics: bool = True,
-                   values_format_specifier: str = '') \
-        -> None:
-
-    # shorten the name for the variable of the format specifier for
-    # signal values
-    vfs = values_format_specifier
-
+def _print_message(message, indent=''):
     print(f'{indent}{message.name}:')
 
     if message.comments:
@@ -64,9 +31,9 @@ def _print_message(message: Message,
         print(f'{indent}  Size: {message.length} bytes')
 
     if message.cycle_time is not None:
-        print(f'{indent}  Cycle time: {_format_val(message.cycle_time, "ms", vfs)}')
+        print(f'{indent}  Cycle time: {message.cycle_time} ms')
 
-    if print_format_specifics and message.autosar:
+    if message.autosar:
         print(f'{indent}  Is network management frame: {message.autosar.is_nm}')
 
         if message.autosar.e2e:
@@ -109,9 +76,7 @@ def _print_message(message: Message,
 
         print(f'{indent}  Potentially contained message details:')
         for contained_message in message.contained_messages:
-            _print_message(contained_message,
-                           '    ',
-                           print_format_specifics=print_format_specifics)
+            _print_message(contained_message, '    ')
 
     if message.signals:
         print(f'{indent}  Signal details:')
@@ -131,67 +96,74 @@ def _print_message(message: Message,
                 print(f'{indent}      Comment[{lang}]: {signal.comments[lang]}')
         if signal.receivers:
             print(f'{indent}      Receiving ECUs: {", ".join(sorted(signal.receivers))}')
-        print(f'{indent}      Internal type: {signal_type}')
+        print(f'{indent}      Type: {signal_type}')
         if signal.multiplexer_signal is not None:
             print(f'{indent}      Selector signal: {signal.multiplexer_signal}')
             selector_sig = None
             selector_sig = message.get_signal_by_name(signal.multiplexer_signal)
             selector_values = []
 
-            if isinstance(signal.multiplexer_ids, list):
-                for x in signal.multiplexer_ids:
-                    if selector_sig.choices and x in selector_sig.choices:
-                        selector_values.append(f'{selector_sig.choices[x]}')
-                    else:
-                        selector_values.append(f'{x}')
+            for x in signal.multiplexer_ids:
+                if selector_sig.choices and x in selector_sig.choices:
+                    selector_values.append(f'{selector_sig.choices[x]}')
+                else:
+                    selector_values.append(f'{x}')
 
             print(f'{indent}      Selector values: {", ".join(selector_values)}')
 
         print(f'{indent}      Start bit: {signal.start}')
         print(f'{indent}      Length: {signal.length} bits')
         print(f'{indent}      Byte order: {signal.byte_order}')
-        unit = ''
         if signal.unit:
             print(f'{indent}      Unit: {signal.unit}')
-            unit = f'{signal.unit}'
         if signal.initial is not None:
-            print(f'{indent}      Initial value: {_format_val(signal.initial, unit, vfs)}')
+            iv = signal.initial
+            if signal.unit is None or not isinstance(iv, float):
+                unit = ''
+            else:
+                unit = f' {signal.unit}'
+            print(f'{indent}      Initial value: {iv}{unit}')
         if signal.invalid is not None:
-            print(f'{indent}      Invalid value: {_format_val(signal.invalid, unit, vfs)}')
+            iv = signal.invalid
+            if signal.unit is None or not isinstance(iv, float):
+                unit = ''
+            else:
+                unit = f' {signal.unit}'
+            print(f'{indent}      Invalid value: {iv}{unit}')
         if signal.is_signed is not None:
             print(f'{indent}      Is signed: {signal.is_signed}')
         if signal.minimum is not None:
-            print(f'{indent}      Minimum: {_format_val(signal.minimum, unit, vfs)}')
+            print(f'{indent}      Minimum: {signal.minimum}')
         if signal.maximum is not None:
-            print(f'{indent}      Maximum: {_format_val(signal.maximum, unit, vfs)}')
+            print(f'{indent}      Maximum: {signal.maximum}')
 
-        has_offset = signal.conversion.offset is not None and signal.conversion.offset != 0
+        has_offset = signal.offset is not None and signal.offset != 0
         has_scale = \
-            signal.conversion.scale is not None \
-            and (signal.conversion.scale > 1 + 1e-10 or signal.conversion.scale < 1 - 1e-10)
+            signal.scale is not None \
+            and (signal.scale > 1 + 1e-10 or signal.scale < 1 - 1e-10)
         if has_offset or has_scale:
-            offset = signal.conversion.offset if signal.conversion.offset is not None else 0
-            print(f'{indent}      Offset: {_format_val(offset, unit, vfs)}')
+            offset = signal.offset if signal.offset is not None else 0
+            print(f'{indent}      Offset: {offset}')
 
-            scale = signal.conversion.scale if signal.conversion.scale is not None else 1
-            print(f'{indent}      Scaling factor: {_format_val(scale, unit, vfs)}')
+            scale = signal.scale if signal.scale is not None else 1
+            print(f'{indent}      Scaling factor: {scale}')
 
         if signal.choices:
             print(f'{indent}      Named values:')
             for value, choice in signal.choices.items():
                 print(f'{indent}        {value}: {choice}')
-                if isinstance(choice, NamedSignalValue):
+                if choice.comments:
                     for lang, description in choice.comments.items():
                         print(f'{indent}          Comment[{lang}]: {description}')
 
-def _print_node(node: Node) -> None:
+def _print_node(node):
     print(f'{node.name}:')
 
     if node.comments:
         for lang in node.comments:
             print(f'  Comment[{lang}]: {node.comments[lang]}')
 
-def _print_bus(bus: Bus) -> None:
+def _print_bus(bus):
     print(f'{bus.name}:')
 
     if bus.comments:
@@ -207,31 +179,25 @@ def _print_bus(bus: Bus) -> None:
     else:
         print(f'  CAN-FD enabled: False')
 
-def _do_list(args: Any, values_format_specifier: str='') -> None:
-    input_file_name = args.input_file_name[0]
-    prune = args.prune
-    no_strict = args.no_strict
-    print_buses = args.print_buses
-    print_nodes = args.print_nodes
+def _do_list(args):
+    input_file_name = args.file[0]
+    prune=args.prune
+    no_strict=args.no_strict
+    print_buses=args.print_buses
+    print_nodes=args.print_nodes
 
     can_db = cantools.database.load_file(input_file_name,
                                          prune_choices=prune,
                                          strict=not no_strict)
-
-    if isinstance(can_db, DiagnosticsDatabase):
-        print('The "list" subcommand only works with non-diagnostic database '
-              'files!')
-        return
 
     if print_buses:
         _do_list_buses(can_db, args)
     elif print_nodes:
         _do_list_nodes(can_db, args)
     else:
-        _do_list_messages(can_db, args, values_format_specifier)
+        _do_list_messages(can_db, args)
 
-def _do_list_buses(can_db: Database,
-                   args: Any) -> None:
+def _do_list_buses(can_db, args):
     bus_names = args.items
 
     for bus in can_db.buses:
@@ -240,8 +206,7 @@ def _do_list_buses(can_db: Database,
 
         _print_bus(bus)
 
-def _do_list_nodes(can_db: Database,
-                   args: Any) -> None:
+def _do_list_nodes(can_db, args):
     node_names = args.items
 
     for node in can_db.nodes:
@@ -250,14 +215,11 @@ def _do_list_nodes(can_db: Database,
 
         _print_node(node)
 
-def _do_list_messages(can_db: Database,
-                      args: Any,
-                      values_format_specifier: str) -> None:
+def _do_list_messages(can_db, args):
     message_names = args.items
     print_all = args.print_all
     exclude_extended = args.exclude_extended
     exclude_normal = args.exclude_normal
-    print_format_specifics = not args.skip_format_specifics
 
     if print_all:
         # if no messages have been specified, we print the list of
@@ -294,17 +256,15 @@ def _do_list_messages(can_db: Database,
         for message_name in message_names:
             try:
                 message = can_db.get_message_by_name(message_name)
-            except KeyError:
+            except:
                 print(f'No message named "{message_name}" has been found in input file.')
                 continue
 
-            _print_message(message,
-                           print_format_specifics=print_format_specifics,
-                           values_format_specifier=values_format_specifier)
+            _print_message(message)
 
 
 
-def add_subparser(subparsers: argparse._SubParsersAction) -> None:
+def add_subparser(subparsers):
     list_parser = subparsers.add_parser(
         'list',
         description=('Print the contents of a bus description file in an easy '
@@ -327,14 +287,6 @@ def add_subparser(subparsers: argparse._SubParsersAction) -> None:
         const=True,
         required=False,
         help='Do not print extended CAN messages.')
-    list_parser.add_argument(
-        '--skip-format-specifics',
-        default=False,
-        action='store_const',
-        const=True,
-        required=False,
-        help=('Do not print any information which is specific to the format '
-              'used by the database file.'))
     list_parser.add_argument(
         '-a', '--all',
         default=False,
@@ -367,7 +319,7 @@ def add_subparser(subparsers: argparse._SubParsersAction) -> None:
         '--no-strict',
         action='store_true',
         help='Skip database consistency checks.')
-    list_parser.add_argument('input_file_name', metavar='FILE', nargs=1)
+    list_parser.add_argument('file', metavar='FILE', nargs=1)
     list_parser.add_argument(
         'items',
         metavar='[BUSES|MESSAGES]',

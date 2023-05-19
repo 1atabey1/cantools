@@ -32,7 +32,7 @@ class DataFrame:
         : """
         self.channel = channel
         self.frame_id = frame_id
-        self.data = bytes(data)
+        self.data = data
         self.timestamp = timestamp
         self.timestamp_format = timestamp_format
 

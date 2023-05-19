@@ -21,8 +21,6 @@ from textparser import (
     tokenize_init,
 )
 
-from ...conversion import BaseConversion
-from ...namedsignalvalue import NamedSignalValue
 from ...utils import (
     SORT_SIGNALS_DEFAULT,
     sort_signals_by_start_bit,
@@ -39,7 +37,7 @@ from ..internal_database import InternalDatabase
 from ..message import Message
 from ..node import Node
 from ..signal import Decimal as SignalDecimal
-from ..signal import Signal
+from ..signal import NamedSignalValue, Signal
 from ..signal_group import SignalGroup
 from .dbc_specifics import DbcSpecifics
 from .utils import num
@@ -1333,7 +1331,7 @@ def _load_signals(tokens,
 
         try:
             return comments[frame_id_dbc]['signal'][signal]
-        except KeyError:
+        except:
             return None
 
     def get_choices(frame_id_dbc, signal):
@@ -1460,13 +1458,9 @@ def _load_signals(tokens,
                                if signal[7] == '0'
                                else 'little_endian'),
                    is_signed=(signal[8] == '-'),
-                   raw_initial=get_signal_initial_value(frame_id_dbc, signal[1][0]),
-                   conversion=BaseConversion.factory(
-                       scale=num(signal[10]),
-                       offset=num(signal[12]),
-                       is_float=get_is_float(frame_id_dbc, signal[1][0]),
-                       choices=get_choices(frame_id_dbc, signal[1][0]),
-                   ),
+                   initial=get_signal_initial_value(frame_id_dbc, signal[1][0]),
+                   scale=num(signal[10]),
+                   offset=num(signal[12]),
                    minimum=get_minimum(signal[15], signal[17]),
                    maximum=get_maximum(signal[15], signal[17]),
                    decimal=SignalDecimal(Decimal(signal[10]),
@@ -1477,6 +1471,8 @@ def _load_signals(tokens,
                                                              signal[17])),
                    unit=(None if signal[19] == '' else signal[19]),
                    spn=get_signal_spn(frame_id_dbc, signal[1][0]),
+                   choices=get_choices(frame_id_dbc,
+                                       signal[1][0]),
                    dbc_specifics=DbcSpecifics(get_attributes(frame_id_dbc, signal[1][0]),
                                               definitions),
                    comment=get_comment(frame_id_dbc,
@@ -1485,7 +1481,8 @@ def _load_signals(tokens,
                    multiplexer_ids=get_multiplexer_ids(signal[1],
                                                        multiplexer_signal),
                    multiplexer_signal=get_multiplexer_signal(signal[1],
-                                                             multiplexer_signal)))
+                                                             multiplexer_signal),
+                   is_float=get_is_float(frame_id_dbc, signal[1][0])))
 
     return signals
 
@@ -1523,7 +1520,7 @@ def _load_messages(tokens,
 
         try:
             return comments[frame_id_dbc]['message']
-        except KeyError:
+        except:
             return None
 
     def get_send_type(frame_id_dbc):
@@ -1538,7 +1535,7 @@ def _load_messages(tokens,
             result = message_attributes['GenMsgSendType'].value
 
             # if definitions is enum (otherwise above value is maintained) -> Prevents ValueError
-            if definitions['GenMsgSendType'].choices is not None:
+            if definitions['GenMsgSendType'].choices != None:
                 # Resolve ENUM index to ENUM text
                 result = definitions['GenMsgSendType'].choices[int(result)]
         except (KeyError, TypeError):
@@ -1566,8 +1563,10 @@ def _load_messages(tokens,
             except (KeyError, TypeError):
                 return None
 
-    def get_frame_format(frame_id_dbc):
-        """Get frame format for a given message"""
+    def get_protocol(frame_id_dbc):
+        """Get protocol for a given message.
+
+        """
 
         message_attributes = get_attributes(frame_id_dbc)
 
@@ -1579,15 +1578,6 @@ def _load_messages(tokens,
                 frame_format = definitions['VFrameFormat'].default_value
             except (KeyError, TypeError):
                 frame_format = None
-
-        return frame_format
-
-    def get_protocol(frame_id_dbc):
-        """Get protocol for a given message.
-
-        """
-
-        frame_format = get_frame_format(frame_id_dbc)
 
         if frame_format == 'J1939PG':
             return 'j1939'
@@ -1605,7 +1595,7 @@ def _load_messages(tokens,
     def get_signal_groups(frame_id_dbc):
         try:
             return signal_groups[frame_id_dbc]
-        except KeyError:
+        except:
             return None
 
     messages = []
@@ -1621,11 +1611,6 @@ def _load_messages(tokens,
         frame_id_dbc = int(message[1])
         frame_id = frame_id_dbc & 0x7fffffff
         is_extended_frame = bool(frame_id_dbc & 0x80000000)
-        frame_format = get_frame_format(frame_id_dbc)
-        if frame_format is not None:
-            is_fd = frame_format.endswith("CAN_FD")
-        else:
-            is_fd = False
 
         # Senders.
         senders = [_get_node_name(attributes, message[5])]
@@ -1676,8 +1661,7 @@ def _load_messages(tokens,
                     protocol=get_protocol(frame_id_dbc),
                     bus_name=bus_name,
                     signal_groups=get_signal_groups(frame_id_dbc),
-                    sort_signals=sort_signals,
-                    is_fd=is_fd))
+                    sort_signals=sort_signals))
 
     return messages
 

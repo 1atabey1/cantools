@@ -21,7 +21,7 @@ def compute_authenticator(raw_payload: bytes,
                           dbmsg: Message,
                           authenticator_fn: SecOCAuthenticatorFn,
                           freshness_value: int) \
-                          -> bytes:
+                          -> bytearray:
     """Given a byte-like object that contains the encoded signals to be
     send, compute the full authenticator SecOC value.
     """

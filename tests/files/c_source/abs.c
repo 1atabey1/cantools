@@ -172,15 +172,6 @@ int abs_bremse_33_unpack(
     return (0);
 }
 
-int abs_bremse_33_init(struct abs_bremse_33_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct abs_bremse_33_t));
-
-    return 0;
-}
-
 uint16_t abs_bremse_33_whlspeed_fl_encode(double value)
 {
     return (uint16_t)(value / 0.015625);
@@ -272,15 +263,6 @@ int abs_bremse_10_unpack(
     return (0);
 }
 
-int abs_bremse_10_init(struct abs_bremse_10_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct abs_bremse_10_t));
-
-    return 0;
-}
-
 int abs_bremse_11_pack(
     uint8_t *dst_p,
     const struct abs_bremse_11_t *src_p,
@@ -310,15 +292,6 @@ int abs_bremse_11_unpack(
     }
 
     return (0);
-}
-
-int abs_bremse_11_init(struct abs_bremse_11_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct abs_bremse_11_t));
-
-    return 0;
 }
 
 int abs_bremse_12_pack(
@@ -352,15 +325,6 @@ int abs_bremse_12_unpack(
     return (0);
 }
 
-int abs_bremse_12_init(struct abs_bremse_12_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct abs_bremse_12_t));
-
-    return 0;
-}
-
 int abs_bremse_13_pack(
     uint8_t *dst_p,
     const struct abs_bremse_13_t *src_p,
@@ -392,15 +356,6 @@ int abs_bremse_13_unpack(
     return (0);
 }
 
-int abs_bremse_13_init(struct abs_bremse_13_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct abs_bremse_13_t));
-
-    return 0;
-}
-
 int abs_drs_rx_id0_pack(
     uint8_t *dst_p,
     const struct abs_drs_rx_id0_t *src_p,
@@ -430,15 +385,6 @@ int abs_drs_rx_id0_unpack(
     }
 
     return (0);
-}
-
-int abs_drs_rx_id0_init(struct abs_drs_rx_id0_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct abs_drs_rx_id0_t));
-
-    return 0;
 }
 
 int abs_mm5_10_tx1_pack(
@@ -475,15 +421,6 @@ int abs_mm5_10_tx1_unpack(
     dst_p->ay1 |= unpack_left_shift_u16(src_p[5], 8u, 0xffu);
 
     return (0);
-}
-
-int abs_mm5_10_tx1_init(struct abs_mm5_10_tx1_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct abs_mm5_10_tx1_t));
-
-    return 0;
 }
 
 uint16_t abs_mm5_10_tx1_yaw_rate_encode(double value)
@@ -552,15 +489,6 @@ int abs_mm5_10_tx2_unpack(
     return (0);
 }
 
-int abs_mm5_10_tx2_init(struct abs_mm5_10_tx2_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct abs_mm5_10_tx2_t));
-
-    return 0;
-}
-
 uint16_t abs_mm5_10_tx2_roll_rate_encode(double value)
 {
     return (uint16_t)((value - -163.84) / 0.005);
@@ -625,15 +553,6 @@ int abs_mm5_10_tx3_unpack(
     return (0);
 }
 
-int abs_mm5_10_tx3_init(struct abs_mm5_10_tx3_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct abs_mm5_10_tx3_t));
-
-    return 0;
-}
-
 uint16_t abs_mm5_10_tx3_az_encode(double value)
 {
     return (uint16_t)((value - -4.1768) / 0.000127465);
@@ -691,15 +610,6 @@ int abs_bremse_2_unpack(
     dst_p->whlspeed_rr_bremse2 |= unpack_left_shift_u16(src_p[7], 8u, 0xffu);
 
     return (0);
-}
-
-int abs_bremse_2_init(struct abs_bremse_2_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct abs_bremse_2_t));
-
-    return 0;
 }
 
 uint16_t abs_bremse_2_whlspeed_fl_bremse2_encode(double value)
@@ -792,15 +702,6 @@ int abs_abs_switch_unpack(
     return (0);
 }
 
-int abs_abs_switch_init(struct abs_abs_switch_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct abs_abs_switch_t));
-
-    return 0;
-}
-
 uint8_t abs_abs_switch_abs_switchposition_encode(double value)
 {
     return (uint8_t)(value);
@@ -847,15 +748,6 @@ int abs_bremse_30_unpack(
     return (0);
 }
 
-int abs_bremse_30_init(struct abs_bremse_30_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct abs_bremse_30_t));
-
-    return 0;
-}
-
 int abs_bremse_31_pack(
     uint8_t *dst_p,
     const struct abs_bremse_31_t *src_p,
@@ -886,15 +778,6 @@ int abs_bremse_31_unpack(
     dst_p->idle_time |= unpack_left_shift_u16(src_p[3], 8u, 0xffu);
 
     return (0);
-}
-
-int abs_bremse_31_init(struct abs_bremse_31_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct abs_bremse_31_t));
-
-    return 0;
 }
 
 uint16_t abs_bremse_31_idle_time_encode(double value)
@@ -952,15 +835,6 @@ int abs_bremse_32_unpack(
     dst_p->wheel_quality_rr = unpack_right_shift_u8(src_p[7], 0u, 0xffu);
 
     return (0);
-}
-
-int abs_bremse_32_init(struct abs_bremse_32_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct abs_bremse_32_t));
-
-    return 0;
 }
 
 uint8_t abs_bremse_32_acc_fa_encode(double value)
@@ -1095,15 +969,6 @@ int abs_bremse_51_unpack(
     dst_p->if_chksum = unpack_right_shift_u8(src_p[7], 4u, 0xf0u);
 
     return (0);
-}
-
-int abs_bremse_51_init(struct abs_bremse_51_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct abs_bremse_51_t));
-
-    return 0;
 }
 
 uint16_t abs_bremse_51_ax1_abs_int_encode(double value)
@@ -1349,15 +1214,6 @@ int abs_bremse_52_unpack(
     }
 
     return (0);
-}
-
-int abs_bremse_52_init(struct abs_bremse_52_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct abs_bremse_52_t));
-
-    return 0;
 }
 
 uint8_t abs_bremse_52_mplx_sw_info_encode(double value)
@@ -2043,15 +1899,6 @@ int abs_bremse_50_unpack(
     return (0);
 }
 
-int abs_bremse_50_init(struct abs_bremse_50_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct abs_bremse_50_t));
-
-    return 0;
-}
-
 uint16_t abs_bremse_50_brake_bal_at50_encode(double value)
 {
     return (uint16_t)(value / 0.1);
@@ -2194,15 +2041,6 @@ int abs_bremse_53_unpack(
     return (0);
 }
 
-int abs_bremse_53_init(struct abs_bremse_53_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct abs_bremse_53_t));
-
-    return 0;
-}
-
 uint8_t abs_bremse_53_switch_position_encode(double value)
 {
     return (uint8_t)(value);
@@ -2230,7 +2068,7 @@ double abs_bremse_53_p_fa_decode(int16_t value)
 
 bool abs_bremse_53_p_fa_is_in_range(int16_t value)
 {
-    return ((value >= -2785) && (value <= 27851));
+    return ((value >= -2785) && (value <= 27850));
 }
 
 uint8_t abs_bremse_53_bls_encode(double value)
@@ -2500,5 +2338,5 @@ double abs_bremse_53_p_ra_decode(int16_t value)
 
 bool abs_bremse_53_p_ra_is_in_range(int16_t value)
 {
-    return ((value >= -2785) && (value <= 27851));
+    return ((value >= -2785) && (value <= 27850));
 }

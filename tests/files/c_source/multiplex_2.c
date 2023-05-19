@@ -233,15 +233,6 @@ int multiplex_2_shared_unpack(
     return (0);
 }
 
-int multiplex_2_shared_init(struct multiplex_2_shared_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct multiplex_2_shared_t));
-
-    return 0;
-}
-
 int8_t multiplex_2_shared_s0_encode(double value)
 {
     return (int8_t)(value);
@@ -369,15 +360,6 @@ int multiplex_2_normal_unpack(
     }
 
     return (0);
-}
-
-int multiplex_2_normal_init(struct multiplex_2_normal_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct multiplex_2_normal_t));
-
-    return 0;
 }
 
 int8_t multiplex_2_normal_s0_encode(double value)
@@ -622,15 +604,6 @@ int multiplex_2_extended_unpack(
     }
 
     return (0);
-}
-
-int multiplex_2_extended_init(struct multiplex_2_extended_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct multiplex_2_extended_t));
-
-    return 0;
 }
 
 int8_t multiplex_2_extended_s0_encode(double value)
@@ -885,16 +858,6 @@ int multiplex_2_extended_types_unpack(
     return (0);
 }
 
-int multiplex_2_extended_types_init(struct multiplex_2_extended_types_t *msg_p)
-{
-    if (msg_p == NULL) return -1;
-
-    memset(msg_p, 0, sizeof(struct multiplex_2_extended_types_t));
-    msg_p->s11 = 2;
-
-    return 0;
-}
-
 uint8_t multiplex_2_extended_types_s11_encode(double value)
 {
     return (uint8_t)(value);
@@ -937,7 +900,7 @@ double multiplex_2_extended_types_s10_decode(float value)
 
 bool multiplex_2_extended_types_s10_is_in_range(float value)
 {
-    return ((value >= -339999999999999996123846586046231871488.0f) && (value <= 339999999999999996123846586046231871488.0f));
+    return ((value >= -340000000000000000000000000000000000000.0f) && (value <= 340000000000000000000000000000000000000.0f));
 }
 
 float multiplex_2_extended_types_s9_encode(double value)

@@ -58,15 +58,6 @@ extern "C" {
 /* Signal choices. */
 
 
-/* Frame Names. */
-#define MIN_MAX_ONLY_6_0_SYMBOL1_NAME "Symbol1"
-
-/* Signal Names. */
-#define MIN_MAX_ONLY_6_0_SYMBOL1_SIGNAL1_NAME "Signal1"
-#define MIN_MAX_ONLY_6_0_SYMBOL1_SIGNAL2_NAME "Signal2"
-#define MIN_MAX_ONLY_6_0_SYMBOL1_SIGNAL4_NAME "Signal4"
-#define MIN_MAX_ONLY_6_0_SYMBOL1_SIGNAL3_NAME "Signal3"
-
 /**
  * Signals in message Symbol1.
  *
@@ -129,15 +120,6 @@ int min_max_only_6_0_symbol1_unpack(
     struct min_max_only_6_0_symbol1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
-
-/**
- * Init message fields to default values from Symbol1.
- *
- * @param[in] msg_p Message to init.
- *
- * @return zero(0) on success or (-1) in case of nullptr argument.
- */
-int min_max_only_6_0_symbol1_init(struct min_max_only_6_0_symbol1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.

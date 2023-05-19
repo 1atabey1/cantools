@@ -7,8 +7,6 @@ from typing import Dict
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element, SubElement
 
-from ...conversion import BaseConversion
-from ...namedsignalvalue import NamedSignalValue
 from ...utils import (
     SORT_SIGNALS_DEFAULT,
     sort_signals_by_start_bit,
@@ -20,7 +18,7 @@ from ..internal_database import InternalDatabase
 from ..message import Message
 from ..node import Node
 from ..signal import Decimal as SignalDecimal
-from ..signal import Signal
+from ..signal import NamedSignalValue, Signal
 from .utils import num
 
 LOGGER = logging.getLogger(__name__)
@@ -66,7 +64,7 @@ def _load_signal_element(signal, nodes):
     notes = None
     receivers = []
     decimal = SignalDecimal(Decimal(slope), Decimal(intercept))
-
+    
     # Signal XML attributes.
     for key, value in signal.attrib.items():
         if key == 'name':
@@ -133,24 +131,20 @@ def _load_signal_element(signal, nodes):
             receivers.append(_get_node_name_by_id(nodes,
                                                   receiver.attrib['id']))
 
-    conversion = BaseConversion.factory(
-        scale=slope,
-        offset=intercept,
-        choices=labels,
-        is_float=is_float,
-    )
-
     return Signal(name=name,
                   start=_start_bit(offset, byte_order),
                   length=length,
                   receivers=receivers,
                   byte_order=byte_order,
                   is_signed=is_signed,
-                  conversion=conversion,
+                  scale=slope,
+                  offset=intercept,
                   minimum=minimum,
                   maximum=maximum,
                   unit=unit,
+                  choices=labels,
                   comment=notes,
+                  is_float=is_float,
                   decimal=decimal)
 
 

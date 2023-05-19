@@ -25,8 +25,7 @@ ignore_missing_imports = true
 
 [tool.ruff]
 select = [
-    "E",  # pycodestyle Error
-    "W",  # pycodestyle Warning
+#    "E",  # pycodestyle Error
     "F",  # pyflakes
 #    "B",  # pyflakes-bugbear
     "UP",  # pyupgrade
@@ -34,7 +33,6 @@ select = [
     "I",  # isort
 ]
 ignore = [
-    "E501",  # line too long
     "F541",  # f-string-missing-placeholders
 ]
 
