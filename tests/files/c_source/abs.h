@@ -144,6 +144,117 @@ extern "C" {
 #define ABS_BREMSE_53_ABS_FAULT_INFO_INACTIVE_FAULTS_STORED_CHOICE (1u)
 #define ABS_BREMSE_53_ABS_FAULT_INFO_ACTIVE_FAULTS_STORED_CHOICE (2u)
 
+/* Frame Names. */
+#define ABS_BREMSE_33_NAME "BREMSE_33"
+#define ABS_BREMSE_10_NAME "BREMSE_10"
+#define ABS_BREMSE_11_NAME "BREMSE_11"
+#define ABS_BREMSE_12_NAME "BREMSE_12"
+#define ABS_BREMSE_13_NAME "BREMSE_13"
+#define ABS_DRS_RX_ID0_NAME "DRS_RX_ID0"
+#define ABS_MM5_10_TX1_NAME "MM5_10_TX1"
+#define ABS_MM5_10_TX2_NAME "MM5_10_TX2"
+#define ABS_MM5_10_TX3_NAME "MM5_10_TX3"
+#define ABS_BREMSE_2_NAME "BREMSE_2"
+#define ABS_ABS_SWITCH_NAME "ABS_Switch"
+#define ABS_BREMSE_30_NAME "BREMSE_30"
+#define ABS_BREMSE_31_NAME "BREMSE_31"
+#define ABS_BREMSE_32_NAME "BREMSE_32"
+#define ABS_BREMSE_51_NAME "BREMSE_51"
+#define ABS_BREMSE_52_NAME "BREMSE_52"
+#define ABS_BREMSE_50_NAME "BREMSE_50"
+#define ABS_BREMSE_53_NAME "BREMSE_53"
+
+/* Signal Names. */
+#define ABS_BREMSE_33_WHLSPEED_FL_NAME "whlspeed_FL"
+#define ABS_BREMSE_33_WHLSPEED_FR_NAME "whlspeed_FR"
+#define ABS_BREMSE_33_WHLSPEED_RL_NAME "whlspeed_RL"
+#define ABS_BREMSE_33_WHLSPEED_RR_NAME "whlspeed_RR"
+#define ABS_MM5_10_TX1_YAW_RATE_NAME "Yaw_Rate"
+#define ABS_MM5_10_TX1_AY1_NAME "AY1"
+#define ABS_MM5_10_TX2_ROLL_RATE_NAME "Roll_Rate"
+#define ABS_MM5_10_TX2_AX1_NAME "AX1"
+#define ABS_MM5_10_TX3_AZ_NAME "AZ"
+#define ABS_BREMSE_2_WHLSPEED_FL_BREMSE2_NAME "whlspeed_FL_Bremse2"
+#define ABS_BREMSE_2_WHLSPEED_FR_BREMSE2_NAME "whlspeed_FR_Bremse2"
+#define ABS_BREMSE_2_WHLSPEED_RL_BREMSE2_NAME "whlspeed_RL_Bremse2"
+#define ABS_BREMSE_2_WHLSPEED_RR_BREMSE2_NAME "whlspeed_RR_Bremse2"
+#define ABS_ABS_SWITCH_ABS_SWITCHPOSITION_NAME "ABS_Switchposition"
+#define ABS_BREMSE_31_IDLE_TIME_NAME "Idle_Time"
+#define ABS_BREMSE_32_ACC_FA_NAME "acc_FA"
+#define ABS_BREMSE_32_ACC_RA_NAME "acc_RA"
+#define ABS_BREMSE_32_WHEEL_QUALITY_FL_NAME "WheelQuality_FL"
+#define ABS_BREMSE_32_WHEEL_QUALITY_FR_NAME "WheelQuality_FR"
+#define ABS_BREMSE_32_WHEEL_QUALITY_RL_NAME "WheelQuality_RL"
+#define ABS_BREMSE_32_WHEEL_QUALITY_RR_NAME "WheelQuality_RR"
+#define ABS_BREMSE_51_AX1_ABS_INT_NAME "AX1_ABS_int"
+#define ABS_BREMSE_51_AY1_ABS_INT_NAME "AY1_ABS_int"
+#define ABS_BREMSE_51_IF_VARIANT_NAME "IF_variant"
+#define ABS_BREMSE_51_IF_REVISION_NAME "IF_revision"
+#define ABS_BREMSE_51_IF_CHKSUM_NAME "IF_chksum"
+#define ABS_BREMSE_52_MPLX_SW_INFO_NAME "Mplx_SW_Info"
+#define ABS_BREMSE_52_SW_VERSION_HIGH_UPPER_NAME "SW_version_High_upper"
+#define ABS_BREMSE_52_BB_DIG1_NAME "BB_dig1"
+#define ABS_BREMSE_52_APPL_ID_01_NAME "Appl_Id_01"
+#define ABS_BREMSE_52_APPL_ID_08_NAME "Appl_Id_08"
+#define ABS_BREMSE_52_APPL_DATE_01_NAME "Appl_date_01"
+#define ABS_BREMSE_52_SW_CAN_IDENT_NAME "SW_CAN_ident"
+#define ABS_BREMSE_52_HU_DATE_YEAR_NAME "HU_date_year"
+#define ABS_BREMSE_52_SW_VERSION_HIGH_LOWER_NAME "SW_version_High_lower"
+#define ABS_BREMSE_52_BB_DIG2_NAME "BB_dig2"
+#define ABS_BREMSE_52_APPL_ID_02_NAME "Appl_Id_02"
+#define ABS_BREMSE_52_APPL_ID_09_NAME "Appl_Id_09"
+#define ABS_BREMSE_52_APPL_DATE_02_NAME "Appl_date_02"
+#define ABS_BREMSE_52_HU_DATE_MONTH_NAME "HU_date_month"
+#define ABS_BREMSE_52_SW_VERSION_MID_UPPER_NAME "SW_version_Mid_upper"
+#define ABS_BREMSE_52_BB_DIG3_NAME "BB_dig3"
+#define ABS_BREMSE_52_APPL_ID_03_NAME "Appl_Id_03"
+#define ABS_BREMSE_52_APPL_ID_10_NAME "Appl_Id_10"
+#define ABS_BREMSE_52_APPL_DATE_03_NAME "Appl_date_03"
+#define ABS_BREMSE_52_HU_DATE_DAY_NAME "HU_date_day"
+#define ABS_BREMSE_52_SW_VERSION_MID_LOWER_NAME "SW_version_Mid_lower"
+#define ABS_BREMSE_52_BB_DIG4_NAME "BB_dig4"
+#define ABS_BREMSE_52_APPL_ID_04_NAME "Appl_Id_04"
+#define ABS_BREMSE_52_APPL_ID_11_NAME "Appl_Id_11"
+#define ABS_BREMSE_52_APPL_DATE_04_NAME "Appl_date_04"
+#define ABS_BREMSE_52_ECU_SERIAL_NAME "Ecu_serial"
+#define ABS_BREMSE_52_SW_VERSION_LOW_UPPER_NAME "SW_version_Low_upper"
+#define ABS_BREMSE_52_BB_DIG5_NAME "BB_dig5"
+#define ABS_BREMSE_52_APPL_ID_05_NAME "Appl_Id_05"
+#define ABS_BREMSE_52_APPL_ID_12_NAME "Appl_Id_12"
+#define ABS_BREMSE_52_APPL_DATE_05_NAME "Appl_date_05"
+#define ABS_BREMSE_52_SW_VERSION_LOW_LOWER_NAME "SW_version_Low_lower"
+#define ABS_BREMSE_52_BB_DIG6_NAME "BB_dig6"
+#define ABS_BREMSE_52_APPL_ID_06_NAME "Appl_Id_06"
+#define ABS_BREMSE_52_APPL_ID_13_NAME "Appl_Id_13"
+#define ABS_BREMSE_52_APPL_DATE_06_NAME "Appl_date_06"
+#define ABS_BREMSE_52_BB_DIG7_NAME "BB_dig7"
+#define ABS_BREMSE_52_APPL_ID_07_NAME "Appl_Id_07"
+#define ABS_BREMSE_52_APPL_ID_14_NAME "Appl_Id_14"
+#define ABS_BREMSE_50_BRAKE_BAL_AT50_NAME "Brake_bal_at50"
+#define ABS_BREMSE_50_BRAKE_BAL_AT50_ADVICE_NAME "Brake_bal_at50_advice"
+#define ABS_BREMSE_50_BRAKE_BAL_PCT_NAME "Brake_bal_pct"
+#define ABS_BREMSE_50_BRAKE_BAL_PCT_ADVICE_NAME "Brake_bal_pct_advice"
+#define ABS_BREMSE_53_SWITCH_POSITION_NAME "SwitchPosition"
+#define ABS_BREMSE_53_P_FA_NAME "P_FA"
+#define ABS_BREMSE_53_BLS_NAME "BLS"
+#define ABS_BREMSE_53_BREMSE_53_CNT_NAME "Bremse_53_cnt"
+#define ABS_BREMSE_53_ABS_MALFUNCTION_NAME "ABS_Malfunction"
+#define ABS_BREMSE_53_ABS_ACTIVE_NAME "ABS_Active"
+#define ABS_BREMSE_53_EBD_LAMP_NAME "EBD_Lamp"
+#define ABS_BREMSE_53_ABS_LAMP_NAME "ABS_Lamp"
+#define ABS_BREMSE_53_DIAG_FL_NAME "Diag_FL"
+#define ABS_BREMSE_53_DIAG_FR_NAME "Diag_FR"
+#define ABS_BREMSE_53_DIAG_RL_NAME "Diag_RL"
+#define ABS_BREMSE_53_DIAG_RR_NAME "Diag_RR"
+#define ABS_BREMSE_53_DIAG_ABS_UNIT_NAME "Diag_ABSUnit"
+#define ABS_BREMSE_53_DIAG_FUSE_VALVE_NAME "Diag_FuseValve"
+#define ABS_BREMSE_53_DIAG_FUSE_PUMP_NAME "Diag_FusePump"
+#define ABS_BREMSE_53_DIAG_P_FA_NAME "Diag_P_FA"
+#define ABS_BREMSE_53_DIAG_P_RA_NAME "Diag_P_RA"
+#define ABS_BREMSE_53_DIAG_YRS_NAME "Diag_YRS"
+#define ABS_BREMSE_53_ABS_FAULT_INFO_NAME "ABS_fault_info"
+#define ABS_BREMSE_53_P_RA_NAME "P_RA"
+
 /**
  * Signals in message BREMSE_33.
  *
@@ -265,7 +376,7 @@ struct abs_mm5_10_tx1_t {
     /**
      * Measured lateral acceleration.
      *
-     * Range: 0..65534.06817557760953987369082 (-4.1768..4.1765 g)
+     * Range: 0..65534 (-4.1768..4.1765 g)
      * Scale: 0.000127465
      * Offset: -4.1768
      */
@@ -290,7 +401,7 @@ struct abs_mm5_10_tx2_t {
     /**
      * Measured longitudional acceleration.
      *
-     * Range: 0..65534.06817557760953987369082 (-4.1768..4.1765 g)
+     * Range: 0..65534 (-4.1768..4.1765 g)
      * Scale: 0.000127465
      * Offset: -4.1768
      */
@@ -306,7 +417,7 @@ struct abs_mm5_10_tx3_t {
     /**
      * Measured vertical acceleration.
      *
-     * Range: 0..65534.06817557760953987369082 (-4.1768..4.1765 g)
+     * Range: 0..65534 (-4.1768..4.1765 g)
      * Scale: 0.000127465
      * Offset: -4.1768
      */
@@ -509,7 +620,7 @@ struct abs_bremse_51_t {
     /**
      * Used lateral acceleration value in the ABS.
      *
-     * Range: 0..65557.21236854496939256003767 (-4.1768..4.1765 g)
+     * Range: 0..65557 (-4.1768..4.1765 g)
      * Scale: 0.00012742
      * Offset: -4.1768
      */
@@ -910,7 +1021,7 @@ struct abs_bremse_53_t {
     /**
      * Brake pressure on the front axle.
      *
-     * Range: -2785.058977719528178243774574..27850.58977719528178243774574 (-42.5..425 bar)
+     * Range: -2785..27851 (-42.5..425 bar)
      * Scale: 0.01526
      * Offset: 0
      */
@@ -1074,7 +1185,7 @@ struct abs_bremse_53_t {
     /**
      * Brake pressure on the rear axle.
      *
-     * Range: -2785.058977719528178243774574..27850.58977719528178243774574 (-42.5..425 bar)
+     * Range: -2785..27851 (-42.5..425 bar)
      * Scale: 0.01526
      * Offset: 0
      */
@@ -1108,6 +1219,15 @@ int abs_bremse_33_unpack(
     struct abs_bremse_33_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from BREMSE_33.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_33_init(struct abs_bremse_33_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -1246,6 +1366,15 @@ int abs_bremse_10_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from BREMSE_10.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_10_init(struct abs_bremse_10_t *msg_p);
+
+/**
  * Pack message BREMSE_11.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -1272,6 +1401,15 @@ int abs_bremse_11_unpack(
     struct abs_bremse_11_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from BREMSE_11.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_11_init(struct abs_bremse_11_t *msg_p);
 
 /**
  * Pack message BREMSE_12.
@@ -1302,6 +1440,15 @@ int abs_bremse_12_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from BREMSE_12.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_12_init(struct abs_bremse_12_t *msg_p);
+
+/**
  * Pack message BREMSE_13.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -1328,6 +1475,15 @@ int abs_bremse_13_unpack(
     struct abs_bremse_13_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from BREMSE_13.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_13_init(struct abs_bremse_13_t *msg_p);
 
 /**
  * Pack message DRS_RX_ID0.
@@ -1358,6 +1514,15 @@ int abs_drs_rx_id0_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from DRS_RX_ID0.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_drs_rx_id0_init(struct abs_drs_rx_id0_t *msg_p);
+
+/**
  * Pack message MM5_10_TX1.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -1384,6 +1549,15 @@ int abs_mm5_10_tx1_unpack(
     struct abs_mm5_10_tx1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from MM5_10_TX1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_mm5_10_tx1_init(struct abs_mm5_10_tx1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -1468,6 +1642,15 @@ int abs_mm5_10_tx2_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from MM5_10_TX2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_mm5_10_tx2_init(struct abs_mm5_10_tx2_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -1550,6 +1733,15 @@ int abs_mm5_10_tx3_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from MM5_10_TX3.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_mm5_10_tx3_init(struct abs_mm5_10_tx3_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -1603,6 +1795,15 @@ int abs_bremse_2_unpack(
     struct abs_bremse_2_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from BREMSE_2.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_2_init(struct abs_bremse_2_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -1741,6 +1942,15 @@ int abs_abs_switch_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from ABS_Switch.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_abs_switch_init(struct abs_abs_switch_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -1796,6 +2006,15 @@ int abs_bremse_30_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from BREMSE_30.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_30_init(struct abs_bremse_30_t *msg_p);
+
+/**
  * Pack message BREMSE_31.
  *
  * @param[out] dst_p Buffer to pack the message into.
@@ -1822,6 +2041,15 @@ int abs_bremse_31_unpack(
     struct abs_bremse_31_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from BREMSE_31.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_31_init(struct abs_bremse_31_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -1877,6 +2105,15 @@ int abs_bremse_32_unpack(
     struct abs_bremse_32_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from BREMSE_32.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_32_init(struct abs_bremse_32_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -2069,6 +2306,15 @@ int abs_bremse_51_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from BREMSE_51.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_51_init(struct abs_bremse_51_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -2230,6 +2476,15 @@ int abs_bremse_52_unpack(
     struct abs_bremse_52_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from BREMSE_52.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_52_init(struct abs_bremse_52_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -3313,6 +3568,15 @@ int abs_bremse_50_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from BREMSE_50.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_50_init(struct abs_bremse_50_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -3447,6 +3711,15 @@ int abs_bremse_53_unpack(
     struct abs_bremse_53_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from BREMSE_53.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int abs_bremse_53_init(struct abs_bremse_53_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.

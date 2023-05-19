@@ -23,7 +23,7 @@ class DecodedMessage:
 class Messages(UserDict):
     def __setitem__(self, message_name, value):
         if getattr(self, '_frozen', False):
-            if not message_name in self.data:
+            if message_name not in self.data:
                 raise KeyError(message_name)
         self.data[message_name] = value
 
@@ -144,7 +144,7 @@ class Message(UserDict):
         return self.data[signal_name]
 
     def __setitem__(self, signal_name, value):
-        if not signal_name in self._signal_names:
+        if signal_name not in self._signal_names:
             raise KeyError(signal_name)
         self.data[signal_name] = value
         self._update_can_message()
@@ -271,7 +271,7 @@ class Message(UserDict):
             maximum = 0 if not signal.maximum else signal.maximum
             if signal.initial:
                 # use initial signal value (if set)
-                initial_sig_values[signal.name] = (signal.initial * signal.decimal.scale) + signal.decimal.offset
+                initial_sig_values[signal.name] = signal.initial
             elif signal.is_multiplexer:
                 initial_sig_values[signal.name] = mplex_settings.get(signal.name, 0)
             elif minimum <= 0 <= maximum:

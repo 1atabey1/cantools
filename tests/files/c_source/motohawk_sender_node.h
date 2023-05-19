@@ -59,6 +59,14 @@ extern "C" {
 #define MOTOHAWK_EXAMPLE_MESSAGE_ENABLE_DISABLED_CHOICE (0u)
 #define MOTOHAWK_EXAMPLE_MESSAGE_ENABLE_ENABLED_CHOICE (1u)
 
+/* Frame Names. */
+#define MOTOHAWK_EXAMPLE_MESSAGE_NAME "ExampleMessage"
+
+/* Signal Names. */
+#define MOTOHAWK_EXAMPLE_MESSAGE_ENABLE_NAME "Enable"
+#define MOTOHAWK_EXAMPLE_MESSAGE_AVERAGE_RADIUS_NAME "AverageRadius"
+#define MOTOHAWK_EXAMPLE_MESSAGE_TEMPERATURE_NAME "Temperature"
+
 /**
  * Signals in message ExampleMessage.
  *
@@ -116,6 +124,15 @@ int motohawk_example_message_unpack(
     struct motohawk_example_message_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from ExampleMessage.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int motohawk_example_message_init(struct motohawk_example_message_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.

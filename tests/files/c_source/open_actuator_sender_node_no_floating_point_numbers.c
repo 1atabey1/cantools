@@ -112,6 +112,15 @@ int open_actuator_control_cmd_unpack(
     return (0);
 }
 
+int open_actuator_control_cmd_init(struct open_actuator_control_cmd_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct open_actuator_control_cmd_t));
+
+    return 0;
+}
+
 bool open_actuator_control_cmd_crc8_cmd1_is_in_range(uint8_t value)
 {
     (void)value;
@@ -131,17 +140,17 @@ bool open_actuator_control_cmd_target_motor_id_cmd1_is_in_range(uint8_t value)
 
 bool open_actuator_control_cmd_position_cmd_64_is_in_range(int16_t value)
 {
-    return ((value >= -29166) && (value <= 29166));
+    return ((value >= -29167) && (value <= 29167));
 }
 
 bool open_actuator_control_cmd_torque_command_8_is_in_range(int16_t value)
 {
-    return ((value >= -479) && (value <= 479));
+    return ((value >= -480) && (value <= 480));
 }
 
 bool open_actuator_control_cmd_torque_close_loop_max_32_is_in_range(uint8_t value)
 {
-    return (value <= 42u);
+    return (value <= 43u);
 }
 
 bool open_actuator_control_cmd_counter_cmd1_is_in_range(uint8_t value)
@@ -166,6 +175,15 @@ int open_actuator_limits_cmd_unpack(
     dst_p->accel_limit |= unpack_left_shift_u16(src_p[5], 8u, 0xffu);
 
     return (0);
+}
+
+int open_actuator_limits_cmd_init(struct open_actuator_limits_cmd_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct open_actuator_limits_cmd_t));
+
+    return 0;
 }
 
 bool open_actuator_limits_cmd_crc8_cmd2_is_in_range(uint8_t value)
@@ -231,6 +249,15 @@ int open_actuator_control_status_unpack(
     return (0);
 }
 
+int open_actuator_control_status_init(struct open_actuator_control_status_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct open_actuator_control_status_t));
+
+    return 0;
+}
+
 bool open_actuator_control_status_crc8_stat1_is_in_range(uint8_t value)
 {
     (void)value;
@@ -271,6 +298,14 @@ int open_actuator_system_status_pack(
     return (3);
 }
 
+int open_actuator_system_status_init(struct open_actuator_system_status_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct open_actuator_system_status_t));
+
+    return 0;
+}
 
 bool open_actuator_system_status_crc8_stat2_is_in_range(uint8_t value)
 {
@@ -289,4 +324,13 @@ bool open_actuator_system_status_chip_temp_is_in_range(uint8_t value)
     (void)value;
 
     return (true);
+}
+
+int open_actuator_torque_sensor_data_init(struct open_actuator_torque_sensor_data_t *msg_p)
+{
+    if (msg_p == NULL) return -1;
+
+    memset(msg_p, 0, sizeof(struct open_actuator_torque_sensor_data_t));
+
+    return 0;
 }

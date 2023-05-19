@@ -88,6 +88,39 @@ extern "C" {
 /* Signal choices. */
 
 
+/* Frame Names. */
+#define SIGNED_BIT_FIELDS_MESSAGE378910_NAME "Message378910"
+#define SIGNED_BIT_FIELDS_MESSAGE63BIG_1_NAME "Message63big_1"
+#define SIGNED_BIT_FIELDS_MESSAGE63_1_NAME "Message63_1"
+#define SIGNED_BIT_FIELDS_MESSAGE63BIG_NAME "Message63big"
+#define SIGNED_BIT_FIELDS_MESSAGE63_NAME "Message63"
+#define SIGNED_BIT_FIELDS_MESSAGE32BIG_NAME "Message32big"
+#define SIGNED_BIT_FIELDS_MESSAGE33BIG_NAME "Message33big"
+#define SIGNED_BIT_FIELDS_MESSAGE64BIG_NAME "Message64big"
+#define SIGNED_BIT_FIELDS_MESSAGE64_NAME "Message64"
+#define SIGNED_BIT_FIELDS_MESSAGE33_NAME "Message33"
+#define SIGNED_BIT_FIELDS_MESSAGE32_NAME "Message32"
+
+/* Signal Names. */
+#define SIGNED_BIT_FIELDS_MESSAGE378910_S7_NAME "s7"
+#define SIGNED_BIT_FIELDS_MESSAGE378910_S8BIG_NAME "s8big"
+#define SIGNED_BIT_FIELDS_MESSAGE378910_S9_NAME "s9"
+#define SIGNED_BIT_FIELDS_MESSAGE378910_S8_NAME "s8"
+#define SIGNED_BIT_FIELDS_MESSAGE378910_S3BIG_NAME "s3big"
+#define SIGNED_BIT_FIELDS_MESSAGE378910_S3_NAME "s3"
+#define SIGNED_BIT_FIELDS_MESSAGE378910_S10BIG_NAME "s10big"
+#define SIGNED_BIT_FIELDS_MESSAGE378910_S7BIG_NAME "s7big"
+#define SIGNED_BIT_FIELDS_MESSAGE63BIG_1_S63BIG_NAME "s63big"
+#define SIGNED_BIT_FIELDS_MESSAGE63_1_S63_NAME "s63"
+#define SIGNED_BIT_FIELDS_MESSAGE63BIG_S63BIG_NAME "s63big"
+#define SIGNED_BIT_FIELDS_MESSAGE63_S63_NAME "s63"
+#define SIGNED_BIT_FIELDS_MESSAGE32BIG_S32BIG_NAME "s32big"
+#define SIGNED_BIT_FIELDS_MESSAGE33BIG_S33BIG_NAME "s33big"
+#define SIGNED_BIT_FIELDS_MESSAGE64BIG_S64BIG_NAME "s64big"
+#define SIGNED_BIT_FIELDS_MESSAGE64_S64_NAME "s64"
+#define SIGNED_BIT_FIELDS_MESSAGE33_S33_NAME "s33"
+#define SIGNED_BIT_FIELDS_MESSAGE32_S32_NAME "s32"
+
 /**
  * Signals in message Message378910.
  *
@@ -256,7 +289,7 @@ struct signed_bit_fields_message64big_t {
  */
 struct signed_bit_fields_message64_t {
     /**
-     * Range: -9223372036854780000..9223372036854780000 (-9.22337203685478E+18..9.22337203685478E+18 -)
+     * Range: -9223372036854779904..9223372036854779904 (-9.22337203685478e+18..9.22337203685478e+18 -)
      * Scale: 1
      * Offset: 0
      */
@@ -318,6 +351,15 @@ int signed_bit_fields_message378910_unpack(
     struct signed_bit_fields_message378910_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from Message378910.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_bit_fields_message378910_init(struct signed_bit_fields_message378910_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -564,6 +606,15 @@ int signed_bit_fields_message63big_1_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from Message63big_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_bit_fields_message63big_1_init(struct signed_bit_fields_message63big_1_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -617,6 +668,15 @@ int signed_bit_fields_message63_1_unpack(
     struct signed_bit_fields_message63_1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from Message63_1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_bit_fields_message63_1_init(struct signed_bit_fields_message63_1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -674,6 +734,15 @@ int signed_bit_fields_message63big_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from Message63big.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_bit_fields_message63big_init(struct signed_bit_fields_message63big_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -727,6 +796,15 @@ int signed_bit_fields_message63_unpack(
     struct signed_bit_fields_message63_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from Message63.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_bit_fields_message63_init(struct signed_bit_fields_message63_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -784,6 +862,15 @@ int signed_bit_fields_message32big_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from Message32big.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_bit_fields_message32big_init(struct signed_bit_fields_message32big_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -837,6 +924,15 @@ int signed_bit_fields_message33big_unpack(
     struct signed_bit_fields_message33big_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from Message33big.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_bit_fields_message33big_init(struct signed_bit_fields_message33big_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -894,6 +990,15 @@ int signed_bit_fields_message64big_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from Message64big.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_bit_fields_message64big_init(struct signed_bit_fields_message64big_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -947,6 +1052,15 @@ int signed_bit_fields_message64_unpack(
     struct signed_bit_fields_message64_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from Message64.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_bit_fields_message64_init(struct signed_bit_fields_message64_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -1004,6 +1118,15 @@ int signed_bit_fields_message33_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from Message33.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_bit_fields_message33_init(struct signed_bit_fields_message33_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -1057,6 +1180,15 @@ int signed_bit_fields_message32_unpack(
     struct signed_bit_fields_message32_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from Message32.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int signed_bit_fields_message32_init(struct signed_bit_fields_message32_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.

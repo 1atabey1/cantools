@@ -74,6 +74,36 @@ extern "C" {
 #define OPEN_ACTUATOR_CONTROL_CMD_TARGET_MODE_TORQUE_CHOICE (3u)
 #define OPEN_ACTUATOR_CONTROL_CMD_TARGET_MODE_POSITION_ABSOLUTE_CHOICE (4u)
 
+/* Frame Names. */
+#define OPEN_ACTUATOR_CONTROL_CMD_NAME "ControlCmd"
+#define OPEN_ACTUATOR_LIMITS_CMD_NAME "LimitsCmd"
+#define OPEN_ACTUATOR_CONTROL_STATUS_NAME "ControlStatus"
+#define OPEN_ACTUATOR_SYSTEM_STATUS_NAME "SystemStatus"
+#define OPEN_ACTUATOR_TORQUE_SENSOR_DATA_NAME "TorqueSensorData"
+
+/* Signal Names. */
+#define OPEN_ACTUATOR_CONTROL_CMD_CRC8_CMD1_NAME "CRC8_CMD1"
+#define OPEN_ACTUATOR_CONTROL_CMD_TARGET_MODE_NAME "TargetMode"
+#define OPEN_ACTUATOR_CONTROL_CMD_TARGET_MOTOR_ID_CMD1_NAME "TargetMotorID_CMD1"
+#define OPEN_ACTUATOR_CONTROL_CMD_POSITION_CMD_64_NAME "PositionCmd_64"
+#define OPEN_ACTUATOR_CONTROL_CMD_TORQUE_COMMAND_8_NAME "TorqueCommand_8"
+#define OPEN_ACTUATOR_CONTROL_CMD_TORQUE_CLOSE_LOOP_MAX_32_NAME "TorqueCloseLoopMax_32"
+#define OPEN_ACTUATOR_CONTROL_CMD_COUNTER_CMD1_NAME "Counter_CMD1"
+#define OPEN_ACTUATOR_LIMITS_CMD_CRC8_CMD2_NAME "CRC8_CMD2"
+#define OPEN_ACTUATOR_LIMITS_CMD_COUNTER_CMD2_NAME "Counter_CMD2"
+#define OPEN_ACTUATOR_LIMITS_CMD_VELOCITY_LIMIT_NAME "VelocityLimit"
+#define OPEN_ACTUATOR_LIMITS_CMD_ACCEL_LIMIT_NAME "AccelLimit"
+#define OPEN_ACTUATOR_CONTROL_STATUS_CRC8_STAT1_NAME "CRC8_STAT1"
+#define OPEN_ACTUATOR_CONTROL_STATUS_COUNTER_STAT1_NAME "Counter_STAT1"
+#define OPEN_ACTUATOR_CONTROL_STATUS_TORQUE_ACTUAL_NAME "TorqueActual"
+#define OPEN_ACTUATOR_CONTROL_STATUS_TORQUE_CLOSE_LOOP_ACTUAL_NAME "TorqueCloseLoopActual"
+#define OPEN_ACTUATOR_SYSTEM_STATUS_CRC8_STAT2_NAME "CRC8_STAT2"
+#define OPEN_ACTUATOR_SYSTEM_STATUS_COUNTER_STAT2_NAME "Counter_STAT2"
+#define OPEN_ACTUATOR_SYSTEM_STATUS_CHIP_TEMP_NAME "ChipTemp"
+#define OPEN_ACTUATOR_TORQUE_SENSOR_DATA_CRC8_DATA1_NAME "CRC8_DATA1"
+#define OPEN_ACTUATOR_TORQUE_SENSOR_DATA_COUNTER_DATA1_NAME "Counter_DATA1"
+#define OPEN_ACTUATOR_TORQUE_SENSOR_DATA_TORQUE_SENSE_NAME "TorqueSense"
+
 /**
  * Signals in message ControlCmd.
  *
@@ -106,7 +136,7 @@ struct open_actuator_control_cmd_t {
      * Alternative usage - absolute output position
      * Factor = 64_const / 200steps / 256microsteps *360deg / FinalGearRatio / GearboxRatio
      *
-     * Range: -29166.61265442101033146234914..29166.61265442101033146234914 (-450..450 deg)
+     * Range: -29167..29167 (-450..450 deg)
      * Scale: 0.0154286
      * Offset: 0
      */
@@ -116,7 +146,7 @@ struct open_actuator_control_cmd_t {
      * Factor:
      * 8_const * 1A/1000mA * MotorRatedTorque / MotorRatedCurrent * GearboxRatio * FinalGearRatio
      *
-     * Range: -479.9990400019199961600076800..479.9990400019199961600076800 (-8..8 N*m)
+     * Range: -480..480 (-8..8 N*m)
      * Scale: 0.0166667
      * Offset: 0
      */
@@ -130,7 +160,7 @@ struct open_actuator_control_cmd_t {
      * Factor:
      * 32_const * 1A/1000mA * MotorRatedTorque / MotorRatedCurrent * GearboxRatio * FinalGearRatio
      *
-     * Range: 0..42.85729591891399612141471934 (0..8 N*m)
+     * Range: 0..43 (0..8 N*m)
      * Scale: 0.186666
      * Offset: 0
      */
@@ -301,6 +331,15 @@ int open_actuator_control_cmd_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from ControlCmd.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int open_actuator_control_cmd_init(struct open_actuator_control_cmd_t *msg_p);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -392,6 +431,15 @@ int open_actuator_limits_cmd_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from LimitsCmd.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int open_actuator_limits_cmd_init(struct open_actuator_limits_cmd_t *msg_p);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -454,6 +502,15 @@ int open_actuator_control_status_unpack(
     struct open_actuator_control_status_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from ControlStatus.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int open_actuator_control_status_init(struct open_actuator_control_status_t *msg_p);
 
 /**
  * Check that given signal is in allowed range.
@@ -520,6 +577,15 @@ int open_actuator_system_status_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from SystemStatus.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int open_actuator_system_status_init(struct open_actuator_system_status_t *msg_p);
+
+/**
  * Check that given signal is in allowed range.
  *
  * @param[in] value Signal to check.
@@ -573,6 +639,15 @@ int open_actuator_torque_sensor_data_unpack(
     struct open_actuator_torque_sensor_data_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from TorqueSensorData.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int open_actuator_torque_sensor_data_init(struct open_actuator_torque_sensor_data_t *msg_p);
 
 /**
  * Check that given signal is in allowed range.

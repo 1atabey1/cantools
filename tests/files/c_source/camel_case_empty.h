@@ -58,6 +58,12 @@ extern "C" {
 /* Signal choices. */
 
 
+/* Frame Names. */
+#define CAMEL_CASE_EMPTY_MESSAGE1_NAME "Message1"
+
+/* Signal Names. */
+
+
 /**
  * Signals in message Message1.
  *
@@ -97,6 +103,15 @@ int camel_case_empty_message1_unpack(
     struct camel_case_empty_message1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from Message1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int camel_case_empty_message1_init(struct camel_case_empty_message1_t *msg_p);
 
 
 #ifdef __cplusplus

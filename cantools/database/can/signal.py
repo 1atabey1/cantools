@@ -1,9 +1,10 @@
 # A CAN signal.
 import decimal
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
-from ...typechecking import ByteOrder, Choices, Comments
-from ..dataelement import DataElement
+from ...typechecking import ByteOrder, Choices, Comments, SignalValueType
+from ..conversion import BaseConversion, IdentityConversion
+from ..namedsignalvalue import NamedSignalValue
 
 if TYPE_CHECKING:
     from ...database.can.formats.dbc import DbcSpecifics
@@ -79,77 +80,7 @@ class Decimal:
         self._maximum = value
 
 
-class NamedSignalValue:
-    """Represents a named value of a signal.
-
-    Named values map an integer number to a human-readable
-    string. Some file formats like ARXML support specifying
-    descriptions for the named value.
-    """
-
-    def __init__(
-        self,
-        value: int,
-        name: str,
-        comments: Optional[Dict[str, str]] = None,
-    ) -> None:
-        self._name = name
-        self._value = value
-        self._comments = comments or {}
-
-    @property
-    def name(self) -> str:
-        """The text intended for human consumption which the specified integer
-        is mapped to.
-        """
-
-        return self._name
-
-    @property
-    def value(self) -> int:
-        """The integer value that gets mapped"""
-
-        return self._value
-
-    @property
-    def comments(self) -> Dict[str, str]:
-        """The descriptions of the named value
-
-        This is a dictionary containing the descriptions in multiple
-        languages. The dictionary is indexed by the language.
-
-        Example:
-
-        .. code:: text
-
-          # retrieve the English comment of the named value or an empty
-          # string if none was specified.
-          named_value.comments.get("EN", "")
-
-        """
-
-        return self._comments
-
-    def __str__(self) -> str:
-        return f"{self._name}"
-
-    def __repr__(self) -> str:
-        return f"'{self._name}'"
-
-    def __eq__(self, x: Any) -> bool:
-        if isinstance(x, NamedSignalValue):
-            return (
-                x.value == self.value
-                and x.name == self.name
-                and x.comments == self.comments
-            )
-        elif isinstance(x, str):
-            return x == self.name
-
-        return False
-
-
-class Signal(DataElement):
+class Signal:
     """A CAN signal with position, size, unit and other information. A
     signal is part of a message.
 
@@ -192,46 +123,68 @@ class Signal(DataElement):
         length: int,
         byte_order: ByteOrder = "little_endian",
         is_signed: bool = False,
-        initial: Optional[int] = None,
-        invalid: Optional[int] = None,
-        scale: float = 1,
-        offset: float = 0,
+        raw_initial: Optional[Union[int, float]] = None,
+        raw_invalid: Optional[Union[int, float]] = None,
+        conversion: BaseConversion = IdentityConversion(is_float=False),
         minimum: Optional[float] = None,
         maximum: Optional[float] = None,
         unit: Optional[str] = None,
-        choices: Optional[Choices] = None,
         dbc_specifics: Optional["DbcSpecifics"] = None,
         comment: Optional[Union[str, Comments]] = None,
         receivers: Optional[List[str]] = None,
         is_multiplexer: bool = False,
         multiplexer_ids: Optional[List[int]] = None,
         multiplexer_signal: Optional[str] = None,
-        is_float: bool = False,
         decimal: Optional[Decimal] = None,
         spn: Optional[int] = None,
     ) -> None:
-        super().__init__(
-            name,
-            start,
-            length,
-            byte_order,
-            is_signed,
-            scale,
-            offset,
-            minimum,
-            maximum,
-            unit,
-            choices,
-            is_float,
-        )
         # avoid using properties to improve encoding/decoding performance
 
-        #: The initial value of the signal, or ``None`` if unavailable.
-        self.initial: Optional[int] = initial
+        #: The signal name as a string.
+        self.name: str = name
 
-        #: The value representing that the signal is invalid,
+        #: The conversion instance, which is used to convert
+        #: between raw and scaled/physical values.
+        self.conversion: BaseConversion = conversion
+
+        #: The scaled minimum value of the signal, or ``None`` if unavailable.
+        self.minimum: Optional[float] = minimum
+
+        #: The scaled maximum value of the signal, or ``None`` if unavailable.
+        self.maximum: Optional[float] = maximum
+
+        #: The start bit position of the signal within its message.
+        self.start: int = start
+
+        #: The length of the signal in bits.
+        self.length: int = length
+
+        #: Signal byte order as ``'little_endian'`` or ``'big_endian'``.
+        self.byte_order: ByteOrder = byte_order
+
+        #: ``True`` if the signal is signed, ``False`` otherwise. Ignore this
+        #: attribute if :attr:`is_float` is ``True``.
+        self.is_signed: bool = is_signed
+
+        #: The internal representation of the initial value of the signal,
         #: or ``None`` if unavailable.
-        self.invalid: Optional[int] = invalid
+        self.raw_initial: Optional[Union[int, float]] = raw_initial
+
+        #: The initial value of the signal in units of the physical world,
+        #: or ``None`` if unavailable.
+        self.initial: Optional[SignalValueType] = (
+            self.conversion.raw_to_scaled(raw_initial) if raw_initial is not None else None
+        )
+
+        #: The raw value representing that the signal is invalid,
+        #: or ``None`` if unavailable.
+        self.raw_invalid: Optional[Union[int, float]] = raw_invalid
+
+        #: The scaled value representing that the signal is invalid,
+        #: or ``None`` if unavailable.
+        self.invalid: Optional[SignalValueType] = (
+            self.conversion.raw_to_scaled(raw_invalid) if raw_invalid is not None else None
+        )
 
         #: The high precision values of
         #: :attr:`~cantools.database.can.Signal.scale`,
@@ -242,6 +195,9 @@ class Signal(DataElement):
         #: See :class:`~cantools.database.can.signal.Decimal` for more
         #: details.
         self.decimal: Optional[Decimal] = decimal
+
+        #: The unit of the signal as a string, or ``None`` if unavailable.
+        self.unit: Optional[str] = unit
 
         #: An object containing dbc specific properties like e.g. attributes.
         self.dbc: Optional["DbcSpecifics"] = dbc_specifics
@@ -278,8 +234,90 @@ class Signal(DataElement):
             self.comments = {None: comment}
         else:
             # assume that we have either no comment at all or a
-            # multi-lingual dictionary
+            # multilingual dictionary
             self.comments = comment
+
+    def raw_to_scaled(
+        self, raw_value: Union[int, float], decode_choices: bool = True
+    ) -> SignalValueType:
+        """Convert an internal raw value according to the defined scaling or value table.
+
+        :param raw_value:
+            The raw value
+        :param decode_choices:
+            If `decode_choices` is ``False`` scaled values are not
+            converted to choice strings (if available).
+        :return:
+            The calculated scaled value
+        """
+        return self.conversion.raw_to_scaled(raw_value, decode_choices)
+
+    def scaled_to_raw(self, scaled_value: SignalValueType) -> Union[int, float]:
+        """Convert a scaled value to the internal raw value.
+
+        :param scaled_value:
+            The scaled value.
+        :return:
+            The internal raw value.
+        """
+        return self.conversion.scaled_to_raw(scaled_value)
+
+    @property
+    def scale(self) -> Union[int, float]:
+        """The scale factor of the signal value."""
+        return self.conversion.scale
+
+    @scale.setter
+    def scale(self, value: Union[int, float]) -> None:
+        self.conversion = self.conversion.factory(
+            scale=value,
+            offset=self.conversion.offset,
+            choices=self.conversion.choices,
+            is_float=self.conversion.is_float,
+        )
+
+    @property
+    def offset(self) -> Union[int, float]:
+        """The offset of the signal value."""
+        return self.conversion.offset
+
+    @offset.setter
+    def offset(self, value: Union[int, float]) -> None:
+        self.conversion = self.conversion.factory(
+            scale=self.conversion.scale,
+            offset=value,
+            choices=self.conversion.choices,
+            is_float=self.conversion.is_float,
+        )
+
+    @property
+    def choices(self) -> Optional[Choices]:
+        """A dictionary mapping signal values to enumerated choices, or
+        ``None`` if unavailable."""
+        return self.conversion.choices
+
+    @choices.setter
+    def choices(self, choices: Optional[Choices]) -> None:
+        self.conversion = self.conversion.factory(
+            scale=self.conversion.scale,
+            offset=self.conversion.offset,
+            choices=choices,
+            is_float=self.conversion.is_float,
+        )
+
+    @property
+    def is_float(self) -> bool:
+        """``True`` if the raw signal value is a float, ``False`` otherwise."""
+        return self.conversion.is_float
+
+    @is_float.setter
+    def is_float(self, is_float: bool) -> None:
+        self.conversion = self.conversion.factory(
+            scale=self.conversion.scale,
+            offset=self.conversion.offset,
+            choices=self.conversion.choices,
+            is_float=is_float,
+        )
 
     @property
     def comment(self) -> Optional[str]:
@@ -305,15 +343,21 @@ class Signal(DataElement):
         else:
             self.comments = {None: value}
 
+    def choice_to_number(self, choice: Union[str, NamedSignalValue]) -> int:
+        try:
+            return self.conversion.choice_to_number(choice)
+        except KeyError as exc:
+            err_msg = f"Choice {choice} not found in Signal {self.name}."
+            raise KeyError(err_msg) from exc
+
     def __repr__(self) -> str:
         if self.choices is None:
             choices = None
         else:
-            choices = "{{{}}}".format(
-                ", ".join(
-                    [f"{value}: '{text}'" for value, text in self.choices.items()]
-                )
+            list_of_choices = ", ".join(
+                [f"{value}: '{text}'" for value, text in self.choices.items()]
             )
+            choices = f"{{{list_of_choices}}}"
 
         return (
             f"signal("
@@ -322,9 +366,9 @@ class Signal(DataElement):
             f"{self.length}, "
             f"'{self.byte_order}', "
             f"{self.is_signed}, "
-            f"{self.initial}, "
-            f"{self.scale}, "
-            f"{self.offset}, "
+            f"{self.raw_initial}, "
+            f"{self.conversion.scale}, "
+            f"{self.conversion.offset}, "
             f"{self.minimum}, "
             f"{self.maximum}, "
             f"'{self.unit}', "

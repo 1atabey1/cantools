@@ -58,6 +58,23 @@ extern "C" {
 /* Signal choices. */
 
 
+/* Frame Names. */
+#define MULTIPLEX_MESSAGE1_NAME "Message1"
+
+/* Signal Names. */
+#define MULTIPLEX_MESSAGE1_MULTIPLEXOR_NAME "Multiplexor"
+#define MULTIPLEX_MESSAGE1_BIT_J_NAME "BIT_J"
+#define MULTIPLEX_MESSAGE1_BIT_C_NAME "BIT_C"
+#define MULTIPLEX_MESSAGE1_BIT_G_NAME "BIT_G"
+#define MULTIPLEX_MESSAGE1_BIT_L_NAME "BIT_L"
+#define MULTIPLEX_MESSAGE1_BIT_A_NAME "BIT_A"
+#define MULTIPLEX_MESSAGE1_BIT_K_NAME "BIT_K"
+#define MULTIPLEX_MESSAGE1_BIT_E_NAME "BIT_E"
+#define MULTIPLEX_MESSAGE1_BIT_D_NAME "BIT_D"
+#define MULTIPLEX_MESSAGE1_BIT_B_NAME "BIT_B"
+#define MULTIPLEX_MESSAGE1_BIT_H_NAME "BIT_H"
+#define MULTIPLEX_MESSAGE1_BIT_F_NAME "BIT_F"
+
 /**
  * Signals in message Message1.
  *
@@ -178,6 +195,15 @@ int multiplex_message1_unpack(
     struct multiplex_message1_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from Message1.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int multiplex_message1_init(struct multiplex_message1_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.

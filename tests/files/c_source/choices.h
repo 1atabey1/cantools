@@ -65,6 +65,12 @@ extern "C" {
 #define CHOICES_FOO_FOO_RESERVED_5_CHOICE (5)
 #define CHOICES_FOO_FOO_RESERVED_6_CHOICE (6)
 
+/* Frame Names. */
+#define CHOICES_FOO_NAME "Foo"
+
+/* Signal Names. */
+#define CHOICES_FOO_FOO_NAME "Foo"
+
 /**
  * Signals in message Foo.
  *
@@ -106,6 +112,15 @@ int choices_foo_unpack(
     struct choices_foo_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from Foo.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int choices_foo_init(struct choices_foo_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.

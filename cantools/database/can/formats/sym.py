@@ -23,12 +23,14 @@ from textparser import (
     tokenize_init,
 )
 
+from ...conversion import BaseConversion
 from ...errors import ParseError
+from ...namedsignalvalue import NamedSignalValue
 from ...utils import SORT_SIGNALS_DEFAULT, sort_signals_by_start_bit, type_sort_signals
 from ..internal_database import InternalDatabase
 from ..message import Message
 from ..signal import Decimal as SignalDecimal
-from ..signal import NamedSignalValue, Signal
+from ..signal import Signal
 from .utils import num
 
 LOGGER = logging.getLogger(__name__)
@@ -418,21 +420,25 @@ def _load_signal(tokens, enums):
         decimal,
         spn)
 
+    conversion = BaseConversion.factory(
+        scale=factor,
+        offset=offset,
+        choices=enum,
+        is_float=is_float,
+    )
+
     return Signal(name=name,
                   start=offset,
                   length=length,
                   receivers=[],
                   byte_order=byte_order,
                   is_signed=is_signed,
-                  scale=factor,
-                  offset=offset,
+                  conversion=conversion,
                   minimum=minimum,
                   maximum=maximum,
                   unit=unit,
-                  choices=enum,
                   comment=comment,
                   is_multiplexer=False,
-                  is_float=is_float,
                   decimal=decimal,
                   spn=spn)
 
@@ -456,23 +462,27 @@ def _load_message_signal(tokens,
     start = int(tokens[3])
     start = _convert_start(start, signal.byte_order)
 
+    conversion = BaseConversion.factory(
+        scale=signal.scale,
+        offset=signal.offset,
+        choices=signal.choices,
+        is_float=signal.is_float,
+    )
+
     return Signal(name=signal.name,
                   start=start,
                   length=signal.length,
                   receivers=signal.receivers,
                   byte_order=signal.byte_order,
                   is_signed=signal.is_signed,
-                  scale=signal.scale,
-                  offset=signal.offset,
+                  conversion=conversion,
                   minimum=signal.minimum,
                   maximum=signal.maximum,
                   unit=signal.unit,
-                  choices=signal.choices,
                   comment=signal.comment,
                   is_multiplexer=signal.is_multiplexer,
                   multiplexer_ids=multiplexer_ids,
                   multiplexer_signal=multiplexer_signal,
-                  is_float=signal.is_float,
                   decimal=signal.decimal,
                   spn=signal.spn)
 
@@ -523,23 +533,27 @@ def _load_message_variable(tokens,
 
     start = _convert_start(start, byte_order)
 
+    conversion = BaseConversion.factory(
+        scale=factor,
+        offset=offset,
+        choices=enum,
+        is_float=is_float,
+    )
+
     return Signal(name=name,
                   start=start,
                   length=length,
                   receivers=[],
                   byte_order=byte_order,
                   is_signed=is_signed,
-                  scale=factor,
-                  offset=offset,
+                  conversion=conversion,
                   minimum=minimum,
                   maximum=maximum,
                   unit=unit,
-                  choices=enum,
                   comment=comment,
                   is_multiplexer=False,
                   multiplexer_ids=multiplexer_ids,
                   multiplexer_signal=multiplexer_signal,
-                  is_float=is_float,
                   decimal=decimal,
                   spn=spn)
 
@@ -805,7 +819,7 @@ def _dump_choices(database: InternalDatabase) -> str:
                 new_choice = _dump_choice(signal)
                 if new_choice:
                     choices.append(new_choice)
-    
+
     if choices:
         return '{ENUMS}\n' + '\n'.join(choices)
     else:
@@ -834,10 +848,10 @@ def _dump_signal(signal: Signal) -> str:
         signal_str += ' -m'
     if signal.unit:
         signal_str += f' /u:"{signal.unit}"'
-    if signal.scale and signal.scale != 1:
-        signal_str += f' /f:{signal.scale}'
-    if signal.offset and signal.offset != 0:
-        signal_str += f' /o:{signal.offset}'
+    if signal.conversion.scale != 1:
+        signal_str += f' /f:{signal.conversion.scale}'
+    if signal.conversion.offset != 0:
+        signal_str += f' /o:{signal.conversion.offset}'
     if signal.maximum is not None:
         signal_str += f' /max:{signal.maximum}'
     if signal.minimum is not None:
@@ -942,7 +956,7 @@ def _dump_messages(database: InternalDatabase) -> str:
             for signal_tree_signal in message.signal_tree:
                 if not isinstance(signal_tree_signal, collections.abc.Mapping):
                     non_multiplexed_signals.append(signal_tree_signal)
-            
+
             for signal_tree_signal in message.signal_tree:
                 if isinstance(signal_tree_signal, collections.abc.Mapping):
                     signal_name, multiplexed_signals = list(signal_tree_signal.items())[0]
@@ -953,14 +967,14 @@ def _dump_messages(database: InternalDatabase) -> str:
                         is_first_message = False
         else:
             message_dumps.append(_dump_message(message, message.signals, min_frame_id, max_frame_id))
-        
+
         if message.senders == [SEND_MESSAGE_SENDER]:
             send_messages.extend(message_dumps)
         elif message.senders == [RECEIVE_MESSAGE_SENDER]:
             receive_messages.extend(message_dumps)
         else:
             send_receive_messages.extend(message_dumps)
-    
+
     messages_dump = ''
     if send_messages:
         messages_dump += '{SEND}\n' + '\n'.join(send_messages) + '\n'
@@ -976,7 +990,7 @@ def dump_string(database: InternalDatabase, *, sort_signals:type_sort_signals=SO
     """
     if sort_signals == SORT_SIGNALS_DEFAULT:
         sort_signals = sort_signals_by_start_bit
-        
+
     sym_str = 'FormatVersion=6.0 // Do not edit this line!\n'
     sym_str += 'Title="SYM Database"\n\n'
 

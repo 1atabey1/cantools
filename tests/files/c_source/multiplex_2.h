@@ -67,6 +67,33 @@ extern "C" {
 /* Signal choices. */
 
 
+/* Frame Names. */
+#define MULTIPLEX_2_SHARED_NAME "Shared"
+#define MULTIPLEX_2_NORMAL_NAME "Normal"
+#define MULTIPLEX_2_EXTENDED_NAME "Extended"
+#define MULTIPLEX_2_EXTENDED_TYPES_NAME "ExtendedTypes"
+
+/* Signal Names. */
+#define MULTIPLEX_2_SHARED_S0_NAME "S0"
+#define MULTIPLEX_2_SHARED_S1_NAME "S1"
+#define MULTIPLEX_2_SHARED_S2_NAME "S2"
+#define MULTIPLEX_2_NORMAL_S0_NAME "S0"
+#define MULTIPLEX_2_NORMAL_S1_NAME "S1"
+#define MULTIPLEX_2_NORMAL_S2_NAME "S2"
+#define MULTIPLEX_2_EXTENDED_S0_NAME "S0"
+#define MULTIPLEX_2_EXTENDED_S5_NAME "S5"
+#define MULTIPLEX_2_EXTENDED_S1_NAME "S1"
+#define MULTIPLEX_2_EXTENDED_S4_NAME "S4"
+#define MULTIPLEX_2_EXTENDED_S2_NAME "S2"
+#define MULTIPLEX_2_EXTENDED_S3_NAME "S3"
+#define MULTIPLEX_2_EXTENDED_S6_NAME "S6"
+#define MULTIPLEX_2_EXTENDED_S8_NAME "S8"
+#define MULTIPLEX_2_EXTENDED_S7_NAME "S7"
+#define MULTIPLEX_2_EXTENDED_TYPES_S11_NAME "S11"
+#define MULTIPLEX_2_EXTENDED_TYPES_S0_NAME "S0"
+#define MULTIPLEX_2_EXTENDED_TYPES_S10_NAME "S10"
+#define MULTIPLEX_2_EXTENDED_TYPES_S9_NAME "S9"
+
 /**
  * Signals in message Shared.
  *
@@ -214,7 +241,7 @@ struct multiplex_2_extended_types_t {
     int8_t s0;
 
     /**
-     * Range: -340000000000000000000000000000000000000..340000000000000000000000000000000000000 (-3.4E+38..3.4E+38 -)
+     * Range: -339999999999999996123846586046231871488..339999999999999996123846586046231871488 (-3.4e+38..3.4e+38 -)
      * Scale: 1
      * Offset: 0
      */
@@ -255,6 +282,15 @@ int multiplex_2_shared_unpack(
     struct multiplex_2_shared_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from Shared.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int multiplex_2_shared_init(struct multiplex_2_shared_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -366,6 +402,15 @@ int multiplex_2_normal_unpack(
     size_t size);
 
 /**
+ * Init message fields to default values from Normal.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int multiplex_2_normal_init(struct multiplex_2_normal_t *msg_p);
+
+/**
  * Encode given signal by applying scaling and offset.
  *
  * @param[in] value Signal to encode.
@@ -473,6 +518,15 @@ int multiplex_2_extended_unpack(
     struct multiplex_2_extended_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from Extended.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int multiplex_2_extended_init(struct multiplex_2_extended_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
@@ -744,6 +798,15 @@ int multiplex_2_extended_types_unpack(
     struct multiplex_2_extended_types_t *dst_p,
     const uint8_t *src_p,
     size_t size);
+
+/**
+ * Init message fields to default values from ExtendedTypes.
+ *
+ * @param[in] msg_p Message to init.
+ *
+ * @return zero(0) on success or (-1) in case of nullptr argument.
+ */
+int multiplex_2_extended_types_init(struct multiplex_2_extended_types_t *msg_p);
 
 /**
  * Encode given signal by applying scaling and offset.
